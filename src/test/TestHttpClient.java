@@ -20,7 +20,7 @@ import common.RegisterResult;
 
 public class TestHttpClient{
 	public static void main(String args[]) throws ClientProtocolException, IOException{
-		/*CloseableHttpClient httpClient=HttpClients.createDefault(); //创建HttpClient
+		CloseableHttpClient httpClient=HttpClients.createDefault(); //创建HttpClient
 		HttpGet httpGet = new HttpGet("http://www.baidu.com");   //Get方法
 		HttpResponse response = httpClient.execute(httpGet); 
 		HttpEntity entity=response.getEntity();
@@ -29,7 +29,7 @@ public class TestHttpClient{
 		System.out.println(header.getValue());
 		InputStream in=entity.getContent();
 		System.out.println(Convert.toString(in));
-		httpClient.close();*/
+		httpClient.close();
 		client.NetworkLayer clientNET=new NetworkLayer();
 		Credential cred=new Credential("yzj","123");
 		RegisterResult result1=clientNET.register(cred);
