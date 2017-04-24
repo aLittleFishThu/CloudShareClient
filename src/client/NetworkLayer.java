@@ -70,7 +70,12 @@ public class NetworkLayer implements INetworkLayer{
 		 * 关闭客户端并返回结果给上层
 		 */
 		httpClient.close();										//关闭服务器
-		return Convert.toLoginResult(status);					//返回登录结果
+		try{
+			LoginResult result=LoginResult.valueOf(status);	
+			return result;										//传回登录结果
+		}catch (IllegalArgumentException e){
+			return LoginResult.unknownError;
+		}
 	}
 
 	@Override
@@ -105,7 +110,12 @@ public class NetworkLayer implements INetworkLayer{
 		 * 关闭客户端并返回结果给上层
 		 */
 		httpClient.close();										//关闭服务器
-		return Convert.toRegisterResult(status);				//返回登录结果
+		try{
+			RegisterResult result=RegisterResult.valueOf(status);	
+			return result;										//传回注册结果
+		}catch (IllegalArgumentException e){
+			return RegisterResult.unknownError;
+		}
 	}
 
 	@Override
@@ -145,7 +155,12 @@ public class NetworkLayer implements INetworkLayer{
 		 * 关闭客户端并返回结果给上层
 		 */
 		httpClient.close();										//关闭服务器
-		return Convert.toChangePasswdResult(status);			//返回登录结果	
+		try{
+			ChangePasswdResult result=ChangePasswdResult.valueOf(status);	
+			return result;										//传回修改密码结果
+		}catch (IllegalArgumentException e){
+			return ChangePasswdResult.unknownError;
+		}
 	}
 	
 	public FileResult uploadFile(CloudFile cloudFile,File file) 
@@ -181,7 +196,12 @@ public class NetworkLayer implements INetworkLayer{
 		/**
 		 * 关闭客户端并返回结果给上层
 		 */
-		httpClient.close();								//关闭服务器
-		return Convert.toFileResult(status);			//返回登录结果			
+		httpClient.close();										//关闭服务器
+		try{
+			FileResult fileResult=FileResult.valueOf(status);	//传回上传文件结果
+			return fileResult;
+		}catch (IllegalArgumentException e){
+			return FileResult.unknownError;
+		}
 	}
 }

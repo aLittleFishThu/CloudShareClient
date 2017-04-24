@@ -84,6 +84,8 @@ public class BusinessLogic implements IBusinessLogic{
 	public FileResult uploadFile(String filename, String filePath) 
 			throws ClientProtocolException, IOException {
 		File file=new File(filePath);
+		if (!file.exists())
+			return FileResult.wrong;
 		CloudFile cloudFile=new CloudFile();
 		cloudFile.setFilename(filename);
 		return m_Network.uploadFile(cloudFile, file);
