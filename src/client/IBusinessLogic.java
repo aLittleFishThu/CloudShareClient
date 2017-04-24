@@ -6,6 +6,7 @@ import org.apache.http.client.ClientProtocolException;
 
 import common.ChangePasswdResult;
 import common.Credential;
+import common.FileResult;
 import common.LoginResult;
 import common.RegisterResult;
 
@@ -22,4 +23,6 @@ public interface IBusinessLogic {
 			throws ClientProtocolException, IOException; 
 	public ChangePasswdResult changePasswd(String password, 
 			String newPassword, String newPasswordAgain) throws ClientProtocolException, IOException;
+	public FileResult uploadFile(String filename,String filePath) 
+			throws ClientProtocolException, IOException;
 }

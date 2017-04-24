@@ -34,7 +34,5 @@ public class TestHttpClient{
 		Credential cred=new Credential("yzj","123");
 		RegisterResult result1=clientNET.register(cred);
 		System.out.println(result1);
-	}
-	
-	
+	}	
 }

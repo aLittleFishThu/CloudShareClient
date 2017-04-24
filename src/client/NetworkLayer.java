@@ -181,7 +181,7 @@ public class NetworkLayer implements INetworkLayer{
 		/**
 		 * 关闭客户端并返回结果给上层
 		 */
-		httpClient.close();										//关闭服务器
+		httpClient.close();								//关闭服务器
 		return Convert.toFileResult(status);			//返回登录结果			
 	}
 }

@@ -1,11 +1,14 @@
 package client;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.http.client.ClientProtocolException;
 
 import common.ChangePasswdResult;
+import common.CloudFile;
 import common.Credential;
+import common.FileResult;
 import common.LoginResult;
 import common.RegisterResult;
 import client.IBusinessLogic;
@@ -71,5 +74,18 @@ public class BusinessLogic implements IBusinessLogic{
 														//调用NET层的相关接口方法，返回结果
 	}
 
-
+	@Override
+	/**
+	 * 实现BLL层的uploadFile接口方法
+	 * @param filename 文件名
+	 * @param filePath 文件路径
+	 * return 结果
+	 */
+	public FileResult uploadFile(String filename, String filePath) 
+			throws ClientProtocolException, IOException {
+		File file=new File(filePath);
+		CloudFile cloudFile=new CloudFile();
+		cloudFile.setFilename(filename);
+		return m_Network.uploadFile(cloudFile, file);
+	}
 }
