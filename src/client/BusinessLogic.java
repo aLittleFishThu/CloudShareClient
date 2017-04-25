@@ -2,15 +2,18 @@ package client;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 
 import org.apache.http.client.ClientProtocolException;
 
 import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
+import common.FileDirectoryResult;
 import common.FileResult;
 import common.LoginResult;
 import common.RegisterResult;
+import common.User;
 import client.IBusinessLogic;
 
 public class BusinessLogic implements IBusinessLogic{
@@ -18,8 +21,15 @@ public class BusinessLogic implements IBusinessLogic{
 	 * 客户端BLL需使用的NET提供接口
 	 */
 	private final INetworkLayer m_Network;
+	private User m_User;
+	private HashSet<CloudFile> selfDirectory;
+	private HashSet<CloudFile> otherDirectory;
+	
 	public BusinessLogic(INetworkLayer network){
 		m_Network=network;
+		m_User=new User();
+		selfDirectory=new HashSet<CloudFile>();
+		otherDirectory=new HashSet<CloudFile>();
 	}
 
 	@Override
@@ -30,7 +40,10 @@ public class BusinessLogic implements IBusinessLogic{
 	 */
 	public LoginResult login(Credential cred) throws ClientProtocolException, IOException {
 		NetworkLayer network=new NetworkLayer();
-		return network.login(cred);   //调用NET层的相关接口方法，直接返回结果
+		LoginResult loginResult=network.login(cred);
+		if (loginResult.equals(LoginResult.OK))
+			m_User=new User(cred.getUserID(),cred.getPassword());
+		return loginResult;   //调用NET层的相关接口方法，直接返回结果
 	}
 
 	@Override
@@ -83,11 +96,46 @@ public class BusinessLogic implements IBusinessLogic{
 	 */
 	public FileResult uploadFile(String filename, String filePath) 
 			throws ClientProtocolException, IOException {
-		File file=new File(filePath);
+		File file=new File(filePath);					//判断上传文件是否存在
 		if (!file.exists())
 			return FileResult.wrong;
-		CloudFile cloudFile=new CloudFile();
+		CloudFile cloudFile=new CloudFile();			//设置文件的filename属性
 		cloudFile.setFilename(filename);
-		return m_Network.uploadFile(cloudFile, file);
+		return m_Network.uploadFile(cloudFile, file);	//返回调用结果
+	}
+
+	@Override
+	/**
+	 * 实现NLL层的下载文件目录方法
+	 * @param targetID
+	 * @return 下载结果和目录
+	 * 下载的目录暂存在BLL层中
+	 */
+	public FileDirectoryResult getDirectory(String targetID) throws IOException {
+		FileDirectoryResult directoryResult=
+				m_Network.getDirectory(targetID);		//调用NET层接口，得到结果
+		if (directoryResult.getResult().equals(FileResult.OK)){
+			if (targetID.equals(m_User.getUserID()))	//暂存文件目录
+				selfDirectory=directoryResult.getFileDirectory();
+			else
+				otherDirectory=directoryResult.getFileDirectory();
+		}
+		return directoryResult;							//返回调用结果到上层
+	}
+
+	@Override
+	/**
+	 * 根据UI传入的filename和userID找到fileID
+	 * @param filename
+	 * @param userID
+	 */
+	public FileResult deleteFile(String filename, String userID) throws IOException {
+		if (!userID.equals(m_User.getUserID()))			//检查权限
+			return FileResult.wrong;
+		String fileID=FileIDHelper.toFileID(filename, selfDirectory);
+		if (fileID==null)
+			return FileResult.wrong;					//将filename转为fileID
+		else
+			return m_Network.deleteFile(fileID);		//调用接口返回结果
 	}
 }

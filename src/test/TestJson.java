@@ -19,5 +19,9 @@ public class TestJson {
 	     set.add(cloud2);
 	     JSONArray jsonArray=new JSONArray(set);
 	     System.out.println(jsonArray);
+	     JSONObject json1=jsonArray.optJSONObject(0);
+	     System.out.println(jsonArray.length());
+	     System.out.println(json1);
+	     System.out.println(json1.get("openList").toString());
 	}
 }

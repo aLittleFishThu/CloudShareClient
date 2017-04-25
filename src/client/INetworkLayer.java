@@ -8,6 +8,7 @@ import org.apache.http.client.ClientProtocolException;
 import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
+import common.FileDirectoryResult;
 import common.FileResult;
 import common.LoginResult;
 import common.RegisterResult;
@@ -28,4 +29,6 @@ public interface INetworkLayer {
 			throws ClientProtocolException, IOException;
 	public FileResult uploadFile(CloudFile cloudFile,File file)
 			throws ClientProtocolException, IOException;
+	public FileDirectoryResult getDirectory(String targetID) throws IOException;
+	public FileResult deleteFile (String fileID) throws IOException;
 }
