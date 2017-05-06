@@ -1,6 +1,5 @@
 package client;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -9,7 +8,6 @@ import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Convert;
 import common.Credential;
-import common.DownloadFileResult;
 import common.FileDirectoryResult;
 import common.FileResult;
 import common.LoginResult;
@@ -42,7 +40,7 @@ public class NetworkLayer implements INetworkLayer{
 
 	@Override
 	/**
-	 * 登录
+	 * 重写客户端Net接口方法
 	 */
 	public LoginResult login(Credential cred) 
 			throws ClientProtocolException, IOException {
@@ -87,9 +85,6 @@ public class NetworkLayer implements INetworkLayer{
 	}
 
 	@Override
-	/**
-	 * 注册
-	 */
 	public RegisterResult register(Credential cred) 
 			throws ClientProtocolException, IOException {
 		/**
@@ -130,9 +125,6 @@ public class NetworkLayer implements INetworkLayer{
 	}
 
 	@Override
-	/**
-	 * 修改密码
-	 */
 	public ChangePasswdResult changePasswd(String password, String newPassword) 
 			throws ClientProtocolException, IOException {
 		/**
@@ -177,9 +169,6 @@ public class NetworkLayer implements INetworkLayer{
 		}
 	}
 	
-	/**
-	 * 上传文件
-	 */
 	public FileResult uploadFile(CloudFile cloudFile,File file) 
 			throws ClientProtocolException, IOException{
 		/**
@@ -223,9 +212,6 @@ public class NetworkLayer implements INetworkLayer{
 	}
 
 	@Override
-	/**
-	 * 获取指定用户文件目录
-	 */
 	public FileDirectoryResult getDirectory(String targetID) throws IOException {
 		/**
 		 * 创建客户端
@@ -284,9 +270,6 @@ public class NetworkLayer implements INetworkLayer{
 	}
 
 	@Override
-	/**
-	 * 删除文件
-	 */
 	public FileResult deleteFile(String fileID) throws IOException {
 		/**
 		 * 创建客户端
@@ -331,52 +314,4 @@ public class NetworkLayer implements INetworkLayer{
 			return FileResult.unknownError;
 		}				
 	}
-	
-/*	@Override
-	*//**
-	 * 获得指定文件内容
-	 *//*
-	public DownloadFileResult downloadFile(String fileID){
-		*//**
-		 * 创建客户端
-		 *//*
-		CloseableHttpClient httpClient=HttpClients.createDefault(); //创建HttpClient
-		HttpGet httpGet = new HttpGet(serverUri+"/file?fileID="+fileID);   		
-																	//Get方法
-		*//**
-		 * 设置发送内容
-		 *//*
-		httpGet.addHeader("Cookie", cookie);   		//Cookie加入Header里
-		
-		*//**
-		 * 获得响应码
-		 *//*
-		HttpResponse httpResponse=httpClient.execute(httpGet); //发出请求并获得响应
-		int statusCode=httpResponse.getStatusLine().getStatusCode();
-		if (statusCode==403)									//判断响应码
-			return new DownloadFileResult(FileResult.unAuthorized);      		
-		else if (statusCode==406)
-			return new DownloadFileResult(FileResult.wrong);
-		else if (statusCode!=200)
-			return new DownloadFileResult(FileResult.unknownError);
-		
-		*//**
-		 * 解析响应内容
-		 *//*
-		HttpEntity responseEntity=httpResponse.getEntity();    	//获得Entity
-		BufferedInputStream buffer=new BufferedInputStream(responseEntity.getContent());
-		
-		
-		*//**
-		 * 关闭客户端并返回结果给上层
-		 *//*
-		httpClient.close();										//关闭服务器
-		try{
-			FileDirectoryResult directoryResult					//传回文件目录
-				=new FileDirectoryResult(directory,FileResult.valueOf(status));						
-			return directoryResult;
-		}catch (IllegalArgumentException e){
-			return new FileDirectoryResult(FileResult.unknownError);
-		}				
-	}*/
 }
