@@ -32,5 +32,7 @@ public interface INetworkLayer {
 			throws ClientProtocolException, IOException;
 	public FileDirectoryResult getDirectory(String targetID) throws IOException;
 	public FileResult deleteFile (String fileID) throws IOException;
-	public DownloadFileResult downloadFile(String fileID) throws UnsupportedOperationException, IOException;
+	public DownloadFileResult downloadFile(String fileID) 
+	        throws UnsupportedOperationException, IOException;
+	public addNote(String fileID,Note note);
 }
