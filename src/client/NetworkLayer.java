@@ -11,6 +11,8 @@ import common.DownloadFileResult;
 import common.FileDirectoryResult;
 import common.FileResult;
 import common.LoginResult;
+import common.Note;
+import common.NoteResult;
 import common.RegisterResult;
 import common.Authorization;
 
@@ -337,7 +339,7 @@ public class NetworkLayer implements INetworkLayer{
         if (statusCode==401)                                    //判断响应码
             return new DownloadFileResult(FileResult.unAuthorized);  
         else if (statusCode==403)
-            return new DownloadFileResult();
+            return new DownloadFileResult(FileResult.wrong);
         else if (statusCode!=200)
             return new DownloadFileResult(FileResult.unknownError);
         
@@ -354,5 +356,50 @@ public class NetworkLayer implements INetworkLayer{
         DownloadFileResult downloadFileResult                 //传回文件目录
             =new DownloadFileResult(content,FileResult.OK);                     
         return downloadFileResult;     
+    }
+
+    @Override
+    public NoteResult addNote(Note note) throws IOException{
+        /**
+         * 创建客户端
+         */
+        CloseableHttpClient httpClient=HttpClients.createDefault(); //创建HttpClient
+        HttpPost httpPost = new HttpPost(serverUri+"/note");   //Post方法
+        /**
+         * 设置发送内容
+         */
+        httpPost.addHeader("Cookie", cookie);           //Cookie加入Header里
+        JSONObject jsonRequest=new JSONObject();        //包装为JSON对象
+        jsonRequest.put("content", note.getContent());
+        jsonRequest.put("fileID", note.getFileID());
+        HttpEntity requestBody=
+                new StringEntity(jsonRequest.toString(), ContentType.APPLICATION_JSON);
+        httpPost.setEntity(requestBody);              //加入请求Body，ContentType自动设置
+        
+        /**
+         * 获得响应并解析
+         */
+        HttpResponse httpResponse=httpClient.execute(httpPost); //发出请求并获得响应
+        int statusCode=httpResponse.getStatusLine().getStatusCode();
+        if (statusCode==401)
+            return NoteResult.unAuthorized;                     //判断响应码
+        else if (statusCode!=200)
+            return NoteResult.unknownError;
+        
+        HttpEntity responseEntity=httpResponse.getEntity();     //获得Entity
+        String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8");//获得Body
+        
+        JSONObject jsonResponse=new JSONObject(responseBody);   //转为JSON对象
+        String status=jsonResponse.getString("status");         //获取状态
+        /**
+         * 关闭客户端并返回结果给上层
+         */
+        httpClient.close();                                     //关闭服务器
+        try{
+            NoteResult result=NoteResult.valueOf(status);   
+            return result;                                      //传回增加备注结果
+        }catch (IllegalArgumentException e){
+            return NoteResult.unknownError;
+        }
     }
 }
