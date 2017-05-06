@@ -9,6 +9,7 @@ import org.apache.http.client.ClientProtocolException;
 import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
+import common.DownloadFileResult;
 import common.FileDirectoryResult;
 import common.FileResult;
 import common.LoginResult;
@@ -126,16 +127,38 @@ public class BusinessLogic implements IBusinessLogic{
 	@Override
 	/**
 	 * 根据UI传入的filename和userID找到fileID
-	 * @param filename
-	 * @param userID
+	 * @param CloudFile
 	 */
-	public FileResult deleteFile(String filename, String userID) throws IOException {
-		if (!userID.equals(m_User.getUserID()))			//检查权限
+	public FileResult deleteFile(CloudFile file) throws IOException {
+	    String filename=file.getFilename();
+	    String targetID=file.getFileID();
+		if (!targetID.equals(m_User.getUserID()))		//检查权限
 			return FileResult.wrong;
-		String fileID=FileIDHelper.toFileID(filename, selfDirectory);
+		String fileID=FileIDHelper.toFileID(filename,targetID,selfDirectory);
 		if (fileID==null)
 			return FileResult.wrong;					//将filename转为fileID
 		else
 			return m_Network.deleteFile(fileID);		//调用接口返回结果
 	}
+
+    @Override
+    public DownloadFileResult downloadFile(CloudFile file) throws UnsupportedOperationException, IOException {
+       String filename=file.getFileID();
+       String targetID=file.getCreator();
+       if (targetID.equals(m_User.getUserID())){
+           String fileID=FileIDHelper.toFileID(filename,targetID,selfDirectory);
+           if (fileID==null)
+               return new DownloadFileResult();            //将filename转为fileID
+           else
+               return m_Network.downloadFile(fileID);        //调用接口返回结果
+       }
+       else
+       {
+           String fileID=FileIDHelper.toFileID(filename,targetID,otherDirectory);
+           if (fileID==null)
+               return new DownloadFileResult();            //将filename转为fileID
+           else
+               return m_Network.downloadFile(fileID);        //调用接口返回结果  
+       }
+    }
 }

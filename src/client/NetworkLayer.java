@@ -6,14 +6,15 @@ import java.util.HashSet;
 
 import common.ChangePasswdResult;
 import common.CloudFile;
-import common.Convert;
 import common.Credential;
+import common.DownloadFileResult;
 import common.FileDirectoryResult;
 import common.FileResult;
 import common.LoginResult;
 import common.RegisterResult;
 import common.Authorization;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -65,7 +66,7 @@ public class NetworkLayer implements INetworkLayer{
 		if (!(httpResponse.getStatusLine().getStatusCode()==200))
 			return LoginResult.unknownError;      				//判断响应码
 		HttpEntity responseEntity=httpResponse.getEntity();    	//获得Entity
-		String responseBody=Convert.toString(responseEntity.getContent()); 
+		String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8"); 
 																//获得Body
 		JSONObject jsonResponse=new JSONObject(responseBody);   //转为JSON对象
 		String status=jsonResponse.getString("status");         //获取状态
@@ -108,7 +109,7 @@ public class NetworkLayer implements INetworkLayer{
 		if (!(httpResponse.getStatusLine().getStatusCode()==200))
 			return RegisterResult.unknownError;      			//判断响应码
 		HttpEntity responseEntity=httpResponse.getEntity();    	//获得Entity
-		String responseBody=Convert.toString(responseEntity.getContent()); 
+		String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8"); 
 																//获得Body
 		JSONObject jsonResponse=new JSONObject(responseBody);   //转为JSON对象
 		String status=jsonResponse.getString("status");         //获取状态
@@ -148,12 +149,12 @@ public class NetworkLayer implements INetworkLayer{
 		 */
 		HttpResponse httpResponse=httpClient.execute(httpPost); //发出请求并获得响应
 		int statusCode=httpResponse.getStatusLine().getStatusCode();
-		if (statusCode==403)
+		if (statusCode==401)
 			return ChangePasswdResult.unAuthorized;      		//判断响应码
 		else if (statusCode!=200)
 			return ChangePasswdResult.unknownError;
 		HttpEntity responseEntity=httpResponse.getEntity();    	//获得Entity
-		String responseBody=Convert.toString(responseEntity.getContent());//获得Body
+		String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8");//获得Body
 		
 		JSONObject jsonResponse=new JSONObject(responseBody);   //转为JSON对象
 		String status=jsonResponse.getString("status");         //获取状态
@@ -190,12 +191,12 @@ public class NetworkLayer implements INetworkLayer{
 		 */
 		HttpResponse httpResponse=httpClient.execute(httpPost); //发出请求并获得响应
 		int statusCode=httpResponse.getStatusLine().getStatusCode();
-		if (statusCode==403)
+		if (statusCode==401)
 			return FileResult.unAuthorized;      		//判断响应码
 		else if (statusCode!=200)
 			return FileResult.unknownError;
 		HttpEntity responseEntity=httpResponse.getEntity();    	//获得Entity
-		String responseBody=Convert.toString(responseEntity.getContent());//获得Body
+		String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8");//获得Body
 		
 		JSONObject jsonResponse=new JSONObject(responseBody);   //转为JSON对象
 		String status=jsonResponse.getString("status");         //获取状态
@@ -229,7 +230,7 @@ public class NetworkLayer implements INetworkLayer{
 		 */
 		HttpResponse httpResponse=httpClient.execute(httpGet); //发出请求并获得响应
 		int statusCode=httpResponse.getStatusLine().getStatusCode();
-		if (statusCode==403)									//判断响应码
+		if (statusCode==401)									//判断响应码
 			return new FileDirectoryResult(FileResult.unAuthorized);      		
 		else if (statusCode!=200)
 			return new FileDirectoryResult(FileResult.unknownError);
@@ -238,7 +239,7 @@ public class NetworkLayer implements INetworkLayer{
 		 * 解析响应内容
 		 */
 		HttpEntity responseEntity=httpResponse.getEntity();    	//获得Entity
-		String responseBody=Convert.toString(responseEntity.getContent());
+		String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8");
 																//获得Body
 		
 		JSONObject jsonResponse=new JSONObject(responseBody);   //转为JSON对象
@@ -287,7 +288,7 @@ public class NetworkLayer implements INetworkLayer{
 		 */
 		HttpResponse httpResponse=httpClient.execute(httpDelete); //发出请求并获得响应
 		int statusCode=httpResponse.getStatusLine().getStatusCode();
-		if (statusCode==403)									//判断响应码
+		if (statusCode==401)									//判断响应码
 			return FileResult.unAuthorized;      		
 		else if (statusCode!=200)
 			return FileResult.unknownError;
@@ -296,7 +297,7 @@ public class NetworkLayer implements INetworkLayer{
 		 * 解析响应内容
 		 */
 		HttpEntity responseEntity=httpResponse.getEntity();    	//获得Entity
-		String responseBody=Convert.toString(responseEntity.getContent());
+		String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8");
 																//获得Body
 		
 		JSONObject jsonResponse=new JSONObject(responseBody);   //转为JSON对象
@@ -314,4 +315,44 @@ public class NetworkLayer implements INetworkLayer{
 			return FileResult.unknownError;
 		}				
 	}
+
+    @Override
+    public DownloadFileResult downloadFile(String fileID) throws UnsupportedOperationException, IOException {
+        /**
+         * 创建客户端
+         */
+        CloseableHttpClient httpClient=HttpClients.createDefault(); //创建HttpClient
+        HttpGet httpGet = new HttpGet(serverUri+"/file?fileID="+fileID);        
+                                                                    //Get方法
+        /**
+         * 设置发送内容
+         */
+        httpGet.addHeader("Cookie", cookie);        //Cookie加入Header里
+        
+        /**
+         * 获得响应码
+         */
+        HttpResponse httpResponse=httpClient.execute(httpGet); //发出请求并获得响应
+        int statusCode=httpResponse.getStatusLine().getStatusCode();
+        if (statusCode==401)                                    //判断响应码
+            return new DownloadFileResult(FileResult.unAuthorized);  
+        else if (statusCode==403)
+            return new DownloadFileResult();
+        else if (statusCode!=200)
+            return new DownloadFileResult(FileResult.unknownError);
+        
+        /**
+         * 解析响应内容
+         */
+        HttpEntity responseEntity=httpResponse.getEntity();     //获得Entity
+        byte[] content=IOUtils.toByteArray(responseEntity.getContent());
+                                                                //获取文件内容
+        /**
+         * 关闭客户端并返回结果给上层
+         */
+        httpClient.close();                                     //关闭服务器
+        DownloadFileResult downloadFileResult                 //传回文件目录
+            =new DownloadFileResult(content,FileResult.OK);                     
+        return downloadFileResult;     
+    }
 }

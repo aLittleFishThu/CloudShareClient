@@ -5,7 +5,9 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 
 import common.ChangePasswdResult;
+import common.CloudFile;
 import common.Credential;
+import common.DownloadFileResult;
 import common.FileDirectoryResult;
 import common.FileResult;
 import common.LoginResult;
@@ -28,6 +30,8 @@ public interface IBusinessLogic {
 			throws ClientProtocolException, IOException;
 	public FileDirectoryResult getDirectory(String targetID) 
 			throws IOException;
-	public FileResult deleteFile(String filename,String userID) 
+	public FileResult deleteFile(CloudFile file) 
 			throws IOException;
+	public DownloadFileResult downloadFile(CloudFile file) 
+	        throws UnsupportedOperationException, IOException;
 }
