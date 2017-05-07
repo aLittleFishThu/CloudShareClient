@@ -24,14 +24,17 @@ public class BusinessLogic implements IBusinessLogic{
 	 */
 	private final INetworkLayer m_Network;
 	private User m_User;
-	private ArrayList<CloudFile> selfDirectory;
-	private ArrayList<CloudFile> otherDirectory;
+
+	private ArrayList<CloudFile> currentDirectory;
+	/*private ArrayList<CloudFile> selfDirectory;
+	private ArrayList<CloudFile> otherDirectory;*/
 	
 	public BusinessLogic(INetworkLayer network){
 		m_Network=network;
 		m_User=new User();
-		selfDirectory=new ArrayList<CloudFile>();
-		otherDirectory=new ArrayList<CloudFile>();
+		currentDirectory=new ArrayList<CloudFile>();
+		/*selfDirectory=new ArrayList<CloudFile>();
+		otherDirectory=new ArrayList<CloudFile>();*/
 	}
 
 	@Override
@@ -116,36 +119,36 @@ public class BusinessLogic implements IBusinessLogic{
 	public FileDirectoryResult getDirectory(String targetID) throws IOException {
 		FileDirectoryResult directoryResult=
 				m_Network.getDirectory(targetID);		//调用NET层接口，得到结果
-		if (directoryResult.getResult().equals(FileResult.OK)){
+		currentDirectory=directoryResult.getFileDirectory();
+		                                                //暂存文件目录
+		/*if (directoryResult.getResult().equals(FileResult.OK)){
 			if (targetID.equals(m_User.getUserID()))	//暂存文件目录
 				selfDirectory=directoryResult.getFileDirectory();
 			else
 				otherDirectory=directoryResult.getFileDirectory();
-		}
-		return directoryResult;							//返回调用结果到上层
+		}*/
+		return directoryResult;						     //返回调用结果到上层
 	}
 
 	@Override
 	/**
-	 * 根据UI传入的filename和userID找到fileID
+	 * UI传入CloudFile对象，判断是否为自己的文件，有权限则调用底层
 	 * @param CloudFile
 	 */
 	public FileResult deleteFile(CloudFile file) throws IOException {
-	    String filename=file.getFilename();
-	    String targetID=file.getFileID();
+	    String targetID=file.getCreator();
+	    String fileID=file.getFileID();
 		if (!targetID.equals(m_User.getUserID()))		//检查权限
 			return FileResult.wrong;
-		String fileID=FileIDHelper.toFileID(filename,targetID,selfDirectory);
-		if (fileID==null)
-			return FileResult.wrong;					//将filename转为fileID
-		else
-			return m_Network.deleteFile(fileID);		//调用接口返回结果
+		
+		return m_Network.deleteFile(fileID);		//调用接口返回结果
 	}
 
     @Override
     public DownloadFileResult downloadFile(CloudFile file) throws UnsupportedOperationException, IOException {
-       String filename=file.getFileID();
-       String targetID=file.getCreator();
+       String fileID=file.getFileID();
+       return m_Network.downloadFile(fileID);
+      /* String targetID=file.getCreator();
        if (targetID.equals(m_User.getUserID())){
            String fileID=FileIDHelper.toFileID(filename,targetID,selfDirectory);
            if (fileID==null)
@@ -160,15 +163,14 @@ public class BusinessLogic implements IBusinessLogic{
                return new DownloadFileResult();            //将filename转为fileID
            else
                return m_Network.downloadFile(fileID);        //调用接口返回结果  
-       }
+       }*/
     }
 
     @Override
     /**
-     * 先根据UI传入的filename和userID找到
+     * 调用底层接口
      */
-    public NoteResult addNote(CloudFile file, Note note) {
-        // TODO 自动生成的方法存根
-        return null;
+    public NoteResult addNote(Note note) throws IOException {
+        return m_Network.addNote(note);
     }
 }

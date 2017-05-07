@@ -36,5 +36,5 @@ public interface IBusinessLogic {
 			throws IOException;
 	public DownloadFileResult downloadFile(CloudFile file) 
 	        throws UnsupportedOperationException, IOException;
-	public NoteResult addNote(CloudFile file,Note note);
+	public NoteResult addNote(Note note) throws IOException;
 }
