@@ -18,6 +18,7 @@ import common.LoginResult;
 import common.Note;
 import common.NoteListResult;
 import common.RegisterResult;
+import common.RenameFileResult;
 import common.UploadFileResult;
 import common.User;
 import client.IBusinessLogic;
@@ -172,6 +173,18 @@ public class BusinessLogic implements IBusinessLogic{
 
     @Override
     /**
+     * 重命名文件
+     */
+    public RenameFileResult renameFile(CloudFile file,String newFilename) throws IOException {
+       if (!file.getCreator().equals(m_User.getUserID()))    //非本人文件
+           return RenameFileResult.wrong;
+       if (file.getFilename().equals(newFilename))           //与原来文件相同
+           return RenameFileResult.OK;                       
+       return m_Network.renameFile(file.getFileID(), newFilename);
+    }
+    
+    @Override
+    /**
      * 调用底层接口
      */
     public AddNoteResult addNote(Note note) throws IOException {
@@ -195,5 +208,4 @@ public class BusinessLogic implements IBusinessLogic{
         String fileID=file.getFileID();
         return m_Network.getNoteList(fileID);
     }
-    
 }

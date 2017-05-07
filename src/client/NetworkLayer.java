@@ -20,6 +20,7 @@ import common.NoteListResult;
 import common.NoteListResult.NoteListStatus;
 import common.RegisterResult;
 import common.Authorization;
+import common.RenameFileResult;
 import common.UploadFileResult;
 
 import org.apache.commons.io.IOUtils;
@@ -402,6 +403,58 @@ public class NetworkLayer implements INetworkLayer{
     }
 
     @Override
+    /**
+     * 重命名
+     */
+    public RenameFileResult renameFile(String fileID, String newFilename) throws IOException {
+        /**
+         * 创建客户端
+         */
+        CloseableHttpClient httpClient=HttpClients.createDefault(); //创建HttpClient
+        HttpPost httpPost = new HttpPost(serverUri+"/file?fileID="+fileID);   
+                                                                    //Post方法
+        /**
+         * 设置发送内容
+         */
+        httpPost.addHeader("Cookie", cookie);           //Cookie加入Header里
+        JSONObject jsonRequest=new JSONObject();        //包装为JSON对象
+        jsonRequest.put("newFilename", newFilename);
+        HttpEntity requestBody=
+                new StringEntity(jsonRequest.toString(), ContentType.APPLICATION_JSON);
+        httpPost.setEntity(requestBody);              //加入请求Body，ContentType自动设置
+        
+        /**
+         * 获得响应并解析
+         */
+        HttpResponse httpResponse=httpClient.execute(httpPost); //发出请求并获得响应
+        int statusCode=httpResponse.getStatusLine().getStatusCode();
+        if (statusCode==401){                                  //判断响应码
+            httpClient.close();
+            return RenameFileResult.unAuthorized;          
+        }   
+        else if (statusCode!=200){
+            httpClient.close();
+            return RenameFileResult.unknownError;
+        }
+            
+        HttpEntity responseEntity=httpResponse.getEntity();     //获得Entity
+        String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8");//获得Body
+        
+        JSONObject jsonResponse=new JSONObject(responseBody);   //转为JSON对象
+        String status=jsonResponse.getString("status");         //获取状态
+        /**
+         * 关闭客户端并返回结果给上层
+         */
+        httpClient.close();                                     //关闭服务器
+        try{
+            RenameFileResult result=RenameFileResult.valueOf(status);   
+            return result;                                      //传回修改密码结果
+        }catch (IllegalArgumentException e){
+            return RenameFileResult.unknownError;
+        }       
+    }
+    
+    @Override
     public AddNoteResult addNote(Note note) throws IOException{
         /**
          * 创建客户端
@@ -571,4 +624,6 @@ public class NetworkLayer implements INetworkLayer{
         httpClient.close();                                     //关闭服务器
         return new NoteListResult(noteList,NoteListStatus.OK);    
     }
+
+  
 }

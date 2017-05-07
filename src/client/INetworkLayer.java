@@ -17,6 +17,7 @@ import common.LoginResult;
 import common.Note;
 import common.NoteListResult;
 import common.RegisterResult;
+import common.RenameFileResult;
 import common.UploadFileResult;
 
 /**
@@ -39,6 +40,8 @@ public interface INetworkLayer {
 	public DeleteFileResult deleteFile (String fileID) throws IOException;
 	public DownloadFileResult downloadFile(String fileID) 
 	        throws UnsupportedOperationException, IOException;
+	public RenameFileResult renameFile(String fileID,String newFilename) 
+	        throws IOException;
 	public AddNoteResult addNote(Note note) throws IOException;
 	public DeleteNoteResult deleteNote(Note note) throws IOException;
 	public NoteListResult getNoteList(String fileID) throws IOException;

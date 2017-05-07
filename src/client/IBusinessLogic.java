@@ -16,6 +16,7 @@ import common.LoginResult;
 import common.Note;
 import common.NoteListResult;
 import common.RegisterResult;
+import common.RenameFileResult;
 import common.UploadFileResult;
 
 /**
@@ -30,7 +31,8 @@ public interface IBusinessLogic {
 	public RegisterResult register(Credential cred, String passwordAgain) 
 			throws ClientProtocolException, IOException; 
 	public ChangePasswdResult changePasswd(String password, 
-			String newPassword, String newPasswordAgain) throws ClientProtocolException, IOException;
+			String newPassword, String newPasswordAgain) 
+			        throws ClientProtocolException, IOException;
 	public UploadFileResult uploadFile(String filename,String filePath) 
 			throws ClientProtocolException, IOException;
 	public FileDirectoryResult getDirectory(String targetID) 
@@ -39,6 +41,8 @@ public interface IBusinessLogic {
 			throws IOException;
 	public DownloadFileResult downloadFile(CloudFile file) 
 	        throws UnsupportedOperationException, IOException;
+	public RenameFileResult renameFile(CloudFile file,String newFilename) 
+	        throws IOException;
 	public AddNoteResult addNote(Note note) throws IOException;
 	public DeleteNoteResult deleteNote(Note note) throws IOException;
 	public NoteListResult getNoteList(CloudFile file) throws IOException;
