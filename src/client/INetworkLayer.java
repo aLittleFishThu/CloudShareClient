@@ -8,13 +8,14 @@ import org.apache.http.client.ClientProtocolException;
 import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
+import common.DeleteFileResult;
 import common.DownloadFileResult;
 import common.FileDirectoryResult;
-import common.FileResult;
 import common.LoginResult;
 import common.Note;
 import common.NoteResult;
 import common.RegisterResult;
+import common.UploadFileResult;
 
 /**
  * 客户端NET层提供接口
@@ -30,10 +31,10 @@ public interface INetworkLayer {
 			throws ClientProtocolException, IOException;
 	public ChangePasswdResult changePasswd(String password, String newPassword)
 			throws ClientProtocolException, IOException;
-	public FileResult uploadFile(CloudFile cloudFile,File file)
+	public UploadFileResult uploadFile(CloudFile cloudFile,File file)
 			throws ClientProtocolException, IOException;
 	public FileDirectoryResult getDirectory(String targetID) throws IOException;
-	public FileResult deleteFile (String fileID) throws IOException;
+	public DeleteFileResult deleteFile (String fileID) throws IOException;
 	public DownloadFileResult downloadFile(String fileID) 
 	        throws UnsupportedOperationException, IOException;
 	public NoteResult addNote(Note note) throws IOException;

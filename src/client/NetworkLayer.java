@@ -7,14 +7,17 @@ import java.util.ArrayList;
 import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
+import common.DeleteFileResult;
 import common.DownloadFileResult;
+import common.DownloadFileResult.DownloadFileStatus;
 import common.FileDirectoryResult;
-import common.FileResult;
+import common.FileDirectoryResult.FileDirectoryStatus;
 import common.LoginResult;
 import common.Note;
 import common.NoteResult;
 import common.RegisterResult;
 import common.Authorization;
+import common.UploadFileResult;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -172,7 +175,7 @@ public class NetworkLayer implements INetworkLayer{
 		}
 	}
 	
-	public FileResult uploadFile(CloudFile cloudFile,File file) 
+	public UploadFileResult uploadFile(CloudFile cloudFile,File file) 
 			throws ClientProtocolException, IOException{
 		/**
 		 * 创建客户端
@@ -194,9 +197,9 @@ public class NetworkLayer implements INetworkLayer{
 		HttpResponse httpResponse=httpClient.execute(httpPost); //发出请求并获得响应
 		int statusCode=httpResponse.getStatusLine().getStatusCode();
 		if (statusCode==401)
-			return FileResult.unAuthorized;      		//判断响应码
+			return UploadFileResult.unAuthorized;      		//判断响应码
 		else if (statusCode!=200)
-			return FileResult.unknownError;
+			return UploadFileResult.unknownError;
 		HttpEntity responseEntity=httpResponse.getEntity();    	//获得Entity
 		String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8");//获得Body
 		
@@ -206,11 +209,11 @@ public class NetworkLayer implements INetworkLayer{
 		 * 关闭客户端并返回结果给上层
 		 */
 		httpClient.close();										//关闭服务器
-		try{
-			FileResult fileResult=FileResult.valueOf(status);	//传回上传文件结果
+		try{                                                    //传回上传文件结果
+			UploadFileResult fileResult=UploadFileResult.valueOf(status);	
 			return fileResult;
 		}catch (IllegalArgumentException e){
-			return FileResult.unknownError;
+			return UploadFileResult.unknownError;
 		}
 	}
 
@@ -233,9 +236,9 @@ public class NetworkLayer implements INetworkLayer{
 		HttpResponse httpResponse=httpClient.execute(httpGet); //发出请求并获得响应
 		int statusCode=httpResponse.getStatusLine().getStatusCode();
 		if (statusCode==401)									//判断响应码
-			return new FileDirectoryResult(FileResult.unAuthorized);      		
+			return new FileDirectoryResult(FileDirectoryStatus.unAuthorized);      		
 		else if (statusCode!=200)
-			return new FileDirectoryResult(FileResult.unknownError);
+			return new FileDirectoryResult(FileDirectoryStatus.unknownError);
 		
 		/**
 		 * 解析响应内容
@@ -265,15 +268,15 @@ public class NetworkLayer implements INetworkLayer{
 		httpClient.close();										//关闭服务器
 		try{
 			FileDirectoryResult directoryResult					//传回文件目录
-				=new FileDirectoryResult(directory,FileResult.valueOf(status));						
+				=new FileDirectoryResult(directory,FileDirectoryStatus.valueOf(status));						
 			return directoryResult;
 		}catch (IllegalArgumentException e){
-			return new FileDirectoryResult(FileResult.unknownError);
+			return new FileDirectoryResult(FileDirectoryStatus.unknownError);
 		}		
 	}
 
 	@Override
-	public FileResult deleteFile(String fileID) throws IOException {
+	public DeleteFileResult deleteFile(String fileID) throws IOException {
 		/**
 		 * 创建客户端
 		 */
@@ -291,9 +294,9 @@ public class NetworkLayer implements INetworkLayer{
 		HttpResponse httpResponse=httpClient.execute(httpDelete); //发出请求并获得响应
 		int statusCode=httpResponse.getStatusLine().getStatusCode();
 		if (statusCode==401)									//判断响应码
-			return FileResult.unAuthorized;      		
+			return DeleteFileResult.unAuthorized;      		
 		else if (statusCode!=200)
-			return FileResult.unknownError;
+			return DeleteFileResult.unknownError;
 		
 		/**
 		 * 解析响应内容
@@ -310,11 +313,11 @@ public class NetworkLayer implements INetworkLayer{
 		 */
 		httpClient.close();										//关闭服务器
 		try{
-			FileResult fileResult								//传回结果
-				=FileResult.valueOf(status);						
+		    DeleteFileResult fileResult							//传回结果
+				=DeleteFileResult.valueOf(status);						
 			return fileResult;
 		}catch (IllegalArgumentException e){
-			return FileResult.unknownError;
+			return DeleteFileResult.unknownError;
 		}				
 	}
 
@@ -337,11 +340,11 @@ public class NetworkLayer implements INetworkLayer{
         HttpResponse httpResponse=httpClient.execute(httpGet); //发出请求并获得响应
         int statusCode=httpResponse.getStatusLine().getStatusCode();
         if (statusCode==401)                                    //判断响应码
-            return new DownloadFileResult(FileResult.unAuthorized);  
+            return new DownloadFileResult(DownloadFileStatus.unAuthorized);  
         else if (statusCode==403)
-            return new DownloadFileResult(FileResult.wrong);
+            return new DownloadFileResult(DownloadFileStatus.wrong);
         else if (statusCode!=200)
-            return new DownloadFileResult(FileResult.unknownError);
+            return new DownloadFileResult(DownloadFileStatus.unknownError);
         
         /**
          * 解析响应内容
@@ -354,7 +357,7 @@ public class NetworkLayer implements INetworkLayer{
          */
         httpClient.close();                                     //关闭服务器
         DownloadFileResult downloadFileResult                 //传回文件目录
-            =new DownloadFileResult(content,FileResult.OK);                     
+            =new DownloadFileResult(content,DownloadFileStatus.OK);                     
         return downloadFileResult;     
     }
 

@@ -7,13 +7,14 @@ import org.apache.http.client.ClientProtocolException;
 import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
+import common.DeleteFileResult;
 import common.DownloadFileResult;
 import common.FileDirectoryResult;
-import common.FileResult;
 import common.LoginResult;
 import common.Note;
 import common.NoteResult;
 import common.RegisterResult;
+import common.UploadFileResult;
 
 /**
  * 客户端BLL层提供接口
@@ -28,11 +29,11 @@ public interface IBusinessLogic {
 			throws ClientProtocolException, IOException; 
 	public ChangePasswdResult changePasswd(String password, 
 			String newPassword, String newPasswordAgain) throws ClientProtocolException, IOException;
-	public FileResult uploadFile(String filename,String filePath) 
+	public UploadFileResult uploadFile(String filename,String filePath) 
 			throws ClientProtocolException, IOException;
 	public FileDirectoryResult getDirectory(String targetID) 
 			throws IOException;
-	public FileResult deleteFile(CloudFile file) 
+	public DeleteFileResult deleteFile(CloudFile file) 
 			throws IOException;
 	public DownloadFileResult downloadFile(CloudFile file) 
 	        throws UnsupportedOperationException, IOException;

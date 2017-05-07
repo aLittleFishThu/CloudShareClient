@@ -3,18 +3,20 @@ package client;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+
 import org.apache.http.client.ClientProtocolException;
 
 import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
+import common.DeleteFileResult;
 import common.DownloadFileResult;
 import common.FileDirectoryResult;
-import common.FileResult;
 import common.LoginResult;
 import common.Note;
 import common.NoteResult;
 import common.RegisterResult;
+import common.UploadFileResult;
 import common.User;
 import client.IBusinessLogic;
 
@@ -99,11 +101,11 @@ public class BusinessLogic implements IBusinessLogic{
 	 * @param filePath 文件路径
 	 * return 结果
 	 */
-	public FileResult uploadFile(String filename, String filePath) 
+	public UploadFileResult uploadFile(String filename, String filePath) 
 			throws ClientProtocolException, IOException {
 		File file=new File(filePath);					//判断上传文件是否存在
 		if (!file.exists())
-			return FileResult.wrong;
+			return UploadFileResult.wrong;
 		CloudFile cloudFile=new CloudFile();			//设置文件的filename属性
 		cloudFile.setFilename(filename);
 		return m_Network.uploadFile(cloudFile, file);	//返回调用结果
@@ -135,11 +137,11 @@ public class BusinessLogic implements IBusinessLogic{
 	 * UI传入CloudFile对象，判断是否为自己的文件，有权限则调用底层
 	 * @param CloudFile
 	 */
-	public FileResult deleteFile(CloudFile file) throws IOException {
+	public DeleteFileResult deleteFile(CloudFile file) throws IOException {
 	    String targetID=file.getCreator();
 	    String fileID=file.getFileID();
 		if (!targetID.equals(m_User.getUserID()))		//检查权限
-			return FileResult.wrong;
+			return DeleteFileResult.wrong;
 		
 		return m_Network.deleteFile(fileID);		//调用接口返回结果
 	}
