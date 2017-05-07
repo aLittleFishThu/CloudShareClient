@@ -4,17 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import common.AddNoteResult;
 import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
 import common.DeleteFileResult;
+import common.DeleteNoteResult;
 import common.DownloadFileResult;
 import common.DownloadFileResult.DownloadFileStatus;
 import common.FileDirectoryResult;
 import common.FileDirectoryResult.FileDirectoryStatus;
 import common.LoginResult;
 import common.Note;
-import common.NoteResult;
 import common.RegisterResult;
 import common.Authorization;
 import common.UploadFileResult;
@@ -362,7 +363,7 @@ public class NetworkLayer implements INetworkLayer{
     }
 
     @Override
-    public NoteResult addNote(Note note) throws IOException{
+    public AddNoteResult addNote(Note note) throws IOException{
         /**
          * 创建客户端
          */
@@ -385,9 +386,9 @@ public class NetworkLayer implements INetworkLayer{
         HttpResponse httpResponse=httpClient.execute(httpPost); //发出请求并获得响应
         int statusCode=httpResponse.getStatusLine().getStatusCode();
         if (statusCode==401)
-            return NoteResult.unAuthorized;                     //判断响应码
+            return AddNoteResult.unAuthorized;                     //判断响应码
         else if (statusCode!=200)
-            return NoteResult.unknownError;
+            return AddNoteResult.unknownError;
         
         HttpEntity responseEntity=httpResponse.getEntity();     //获得Entity
         String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8");//获得Body
@@ -399,15 +400,15 @@ public class NetworkLayer implements INetworkLayer{
          */
         httpClient.close();                                     //关闭服务器
         try{
-            NoteResult result=NoteResult.valueOf(status);   
+            AddNoteResult result=AddNoteResult.valueOf(status);   
             return result;                                      //传回增加备注结果
         }catch (IllegalArgumentException e){
-            return NoteResult.unknownError;
+            return AddNoteResult.unknownError;
         }
     }
 
     @Override
-    public NoteResult deleteNote(Note note) throws IOException {
+    public DeleteNoteResult deleteNote(Note note) throws IOException {
         /**
          * 创建客户端
          */
@@ -428,9 +429,9 @@ public class NetworkLayer implements INetworkLayer{
         HttpResponse httpResponse=httpClient.execute(httpDelete); //发出请求并获得响应
         int statusCode=httpResponse.getStatusLine().getStatusCode();
         if (statusCode==401)                                    //判断响应码
-            return NoteResult.unAuthorized;             
+            return DeleteNoteResult.unAuthorized;             
         else if (statusCode!=200)
-            return NoteResult.unknownError;
+            return DeleteNoteResult.unknownError;
         
         /**
          * 解析响应内容
@@ -447,11 +448,11 @@ public class NetworkLayer implements INetworkLayer{
          */
         httpClient.close();                                     //关闭服务器
         try{
-            NoteResult noteResult                               //传回结果
-                =NoteResult.valueOf(status);                        
+            DeleteNoteResult noteResult                               //传回结果
+                =DeleteNoteResult.valueOf(status);                        
             return noteResult;
         }catch (IllegalArgumentException e){
-            return NoteResult.unknownError;
+            return DeleteNoteResult.unknownError;
         }                       
     }
 }

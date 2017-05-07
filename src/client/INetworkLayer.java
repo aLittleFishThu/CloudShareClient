@@ -5,15 +5,16 @@ import java.io.IOException;
 
 import org.apache.http.client.ClientProtocolException;
 
+import common.AddNoteResult;
 import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
 import common.DeleteFileResult;
+import common.DeleteNoteResult;
 import common.DownloadFileResult;
 import common.FileDirectoryResult;
 import common.LoginResult;
 import common.Note;
-import common.NoteResult;
 import common.RegisterResult;
 import common.UploadFileResult;
 
@@ -37,6 +38,6 @@ public interface INetworkLayer {
 	public DeleteFileResult deleteFile (String fileID) throws IOException;
 	public DownloadFileResult downloadFile(String fileID) 
 	        throws UnsupportedOperationException, IOException;
-	public NoteResult addNote(Note note) throws IOException;
-	public NoteResult deleteNote(Note note) throws IOException;
+	public AddNoteResult addNote(Note note) throws IOException;
+	public DeleteNoteResult deleteNote(Note note) throws IOException;
 }

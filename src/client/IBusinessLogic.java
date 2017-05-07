@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.http.client.ClientProtocolException;
 
+import common.AddNoteResult;
 import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
@@ -12,7 +13,6 @@ import common.DownloadFileResult;
 import common.FileDirectoryResult;
 import common.LoginResult;
 import common.Note;
-import common.NoteResult;
 import common.RegisterResult;
 import common.UploadFileResult;
 
@@ -37,5 +37,5 @@ public interface IBusinessLogic {
 			throws IOException;
 	public DownloadFileResult downloadFile(CloudFile file) 
 	        throws UnsupportedOperationException, IOException;
-	public NoteResult addNote(Note note) throws IOException;
+	public AddNoteResult addNote(Note note) throws IOException;
 }

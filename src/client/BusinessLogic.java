@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import org.apache.http.client.ClientProtocolException;
 
+import common.AddNoteResult;
 import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
@@ -14,7 +15,6 @@ import common.DownloadFileResult;
 import common.FileDirectoryResult;
 import common.LoginResult;
 import common.Note;
-import common.NoteResult;
 import common.RegisterResult;
 import common.UploadFileResult;
 import common.User;
@@ -172,7 +172,7 @@ public class BusinessLogic implements IBusinessLogic{
     /**
      * 调用底层接口
      */
-    public NoteResult addNote(Note note) throws IOException {
+    public AddNoteResult addNote(Note note) throws IOException {
         return m_Network.addNote(note);
     }
 }
