@@ -11,6 +11,8 @@ import common.DownloadFileResult;
 import common.FileDirectoryResult;
 import common.FileResult;
 import common.LoginResult;
+import common.Note;
+import common.NoteResult;
 import common.RegisterResult;
 
 /**
@@ -34,4 +36,5 @@ public interface IBusinessLogic {
 			throws IOException;
 	public DownloadFileResult downloadFile(CloudFile file) 
 	        throws UnsupportedOperationException, IOException;
+	public NoteResult addNote(CloudFile file,Note note);
 }

@@ -13,6 +13,8 @@ import common.DownloadFileResult;
 import common.FileDirectoryResult;
 import common.FileResult;
 import common.LoginResult;
+import common.Note;
+import common.NoteResult;
 import common.RegisterResult;
 import common.User;
 import client.IBusinessLogic;
@@ -160,5 +162,14 @@ public class BusinessLogic implements IBusinessLogic{
            else
                return m_Network.downloadFile(fileID);        //调用接口返回结果  
        }
+    }
+
+    @Override
+    /**
+     * 先根据UI传入的filename和userID找到
+     */
+    public NoteResult addNote(CloudFile file, Note note) {
+        // TODO 自动生成的方法存根
+        return null;
     }
 }

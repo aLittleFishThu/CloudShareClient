@@ -402,4 +402,53 @@ public class NetworkLayer implements INetworkLayer{
             return NoteResult.unknownError;
         }
     }
+
+    @Override
+    public NoteResult deleteNote(Note note) throws IOException {
+        /**
+         * 创建客户端
+         */
+        CloseableHttpClient httpClient=HttpClients.createDefault(); //创建HttpClient
+        String noteID=note.getNoteID();
+        String fileID=note.getFileID();
+        HttpDelete httpDelete = 
+                new HttpDelete(serverUri+"/note?noteID="+noteID+"&fileID="+fileID);           
+                                                                    //Delete方法
+        /**
+         * 设置发送内容
+         */
+        httpDelete.addHeader("Cookie", cookie);         //Cookie加入Header里
+        
+        /**
+         * 获得响应码
+         */
+        HttpResponse httpResponse=httpClient.execute(httpDelete); //发出请求并获得响应
+        int statusCode=httpResponse.getStatusLine().getStatusCode();
+        if (statusCode==401)                                    //判断响应码
+            return NoteResult.unAuthorized;             
+        else if (statusCode!=200)
+            return NoteResult.unknownError;
+        
+        /**
+         * 解析响应内容
+         */
+        HttpEntity responseEntity=httpResponse.getEntity();     //获得Entity
+        String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8");
+                                                                //获得Body
+        
+        JSONObject jsonResponse=new JSONObject(responseBody);   //转为JSON对象
+        String status=jsonResponse.getString("status");         //获取状态
+        
+        /**
+         * 关闭客户端并返回结果给上层
+         */
+        httpClient.close();                                     //关闭服务器
+        try{
+            NoteResult noteResult                               //传回结果
+                =NoteResult.valueOf(status);                        
+            return noteResult;
+        }catch (IllegalArgumentException e){
+            return NoteResult.unknownError;
+        }                       
+    }
 }

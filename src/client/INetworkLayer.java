@@ -37,4 +37,5 @@ public interface INetworkLayer {
 	public DownloadFileResult downloadFile(String fileID) 
 	        throws UnsupportedOperationException, IOException;
 	public NoteResult addNote(Note note) throws IOException;
+	public NoteResult deleteNote(Note note) throws IOException;
 }
