@@ -11,10 +11,12 @@ import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
 import common.DeleteFileResult;
+import common.DeleteNoteResult;
 import common.DownloadFileResult;
 import common.FileDirectoryResult;
 import common.LoginResult;
 import common.Note;
+import common.NoteListResult;
 import common.RegisterResult;
 import common.UploadFileResult;
 import common.User;
@@ -27,14 +29,14 @@ public class BusinessLogic implements IBusinessLogic{
 	private final INetworkLayer m_Network;
 	private User m_User;
 
-	private ArrayList<CloudFile> currentDirectory;
+	//private ArrayList<CloudFile> currentDirectory;
 	/*private ArrayList<CloudFile> selfDirectory;
 	private ArrayList<CloudFile> otherDirectory;*/
 	
 	public BusinessLogic(INetworkLayer network){
 		m_Network=network;
 		m_User=new User();
-		currentDirectory=new ArrayList<CloudFile>();
+		//currentDirectory=new ArrayList<CloudFile>();
 		/*selfDirectory=new ArrayList<CloudFile>();
 		otherDirectory=new ArrayList<CloudFile>();*/
 	}
@@ -121,7 +123,7 @@ public class BusinessLogic implements IBusinessLogic{
 	public FileDirectoryResult getDirectory(String targetID) throws IOException {
 		FileDirectoryResult directoryResult=
 				m_Network.getDirectory(targetID);		//调用NET层接口，得到结果
-		currentDirectory=directoryResult.getFileDirectory();
+		//currentDirectory=directoryResult.getFileDirectory();
 		                                                //暂存文件目录
 		/*if (directoryResult.getResult().equals(FileResult.OK)){
 			if (targetID.equals(m_User.getUserID()))	//暂存文件目录
@@ -175,4 +177,23 @@ public class BusinessLogic implements IBusinessLogic{
     public AddNoteResult addNote(Note note) throws IOException {
         return m_Network.addNote(note);
     }
+
+    @Override
+    /**
+     * 删除备注
+     * @param note
+     * 先判断权限
+     */
+    public DeleteNoteResult deleteNote(Note note) throws IOException {
+        if (!note.getCreator().equals(m_User.getUserID()))  //检查权限
+            return DeleteNoteResult.wrong;
+        return m_Network.deleteNote(note);                  //调用接口
+    }
+
+    @Override
+    public NoteListResult getNoteList(CloudFile file) throws IOException {
+        String fileID=file.getFileID();
+        return m_Network.getNoteList(fileID);
+    }
+    
 }

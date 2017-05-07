@@ -9,10 +9,12 @@ import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
 import common.DeleteFileResult;
+import common.DeleteNoteResult;
 import common.DownloadFileResult;
 import common.FileDirectoryResult;
 import common.LoginResult;
 import common.Note;
+import common.NoteListResult;
 import common.RegisterResult;
 import common.UploadFileResult;
 
@@ -38,4 +40,6 @@ public interface IBusinessLogic {
 	public DownloadFileResult downloadFile(CloudFile file) 
 	        throws UnsupportedOperationException, IOException;
 	public AddNoteResult addNote(Note note) throws IOException;
+	public DeleteNoteResult deleteNote(Note note) throws IOException;
+	public NoteListResult getNoteList(CloudFile file) throws IOException;
 }

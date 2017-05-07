@@ -16,6 +16,8 @@ import common.FileDirectoryResult;
 import common.FileDirectoryResult.FileDirectoryStatus;
 import common.LoginResult;
 import common.Note;
+import common.NoteListResult;
+import common.NoteListResult.NoteListStatus;
 import common.RegisterResult;
 import common.Authorization;
 import common.UploadFileResult;
@@ -69,8 +71,11 @@ public class NetworkLayer implements INetworkLayer{
 		 * 获得响应并解析
 		 */
 		HttpResponse httpResponse=httpClient.execute(httpPost); //发出请求并获得响应
-		if (!(httpResponse.getStatusLine().getStatusCode()==200))
-			return LoginResult.unknownError;      				//判断响应码
+		if (!(httpResponse.getStatusLine().getStatusCode()==200)){
+		    httpClient.close();
+		    return LoginResult.unknownError;                      //判断响应码
+		}
+			
 		HttpEntity responseEntity=httpResponse.getEntity();    	//获得Entity
 		String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8"); 
 																//获得Body
@@ -112,8 +117,11 @@ public class NetworkLayer implements INetworkLayer{
 		 * 获得响应并解析
 		 */
 		HttpResponse httpResponse=httpClient.execute(httpPost); //发出请求并获得响应
-		if (!(httpResponse.getStatusLine().getStatusCode()==200))
-			return RegisterResult.unknownError;      			//判断响应码
+		if (!(httpResponse.getStatusLine().getStatusCode()==200)){
+		    httpClient.close();
+		    return RegisterResult.unknownError;               //判断响应码
+		}
+			
 		HttpEntity responseEntity=httpResponse.getEntity();    	//获得Entity
 		String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8"); 
 																//获得Body
@@ -155,10 +163,15 @@ public class NetworkLayer implements INetworkLayer{
 		 */
 		HttpResponse httpResponse=httpClient.execute(httpPost); //发出请求并获得响应
 		int statusCode=httpResponse.getStatusLine().getStatusCode();
-		if (statusCode==401)
-			return ChangePasswdResult.unAuthorized;      		//判断响应码
-		else if (statusCode!=200)
-			return ChangePasswdResult.unknownError;
+		if (statusCode==401){                                  //判断响应码
+		    httpClient.close();
+		    return ChangePasswdResult.unAuthorized;          
+		}	
+		else if (statusCode!=200){
+		    httpClient.close();
+		    return ChangePasswdResult.unknownError;
+		}
+			
 		HttpEntity responseEntity=httpResponse.getEntity();    	//获得Entity
 		String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8");//获得Body
 		
@@ -197,10 +210,15 @@ public class NetworkLayer implements INetworkLayer{
 		 */
 		HttpResponse httpResponse=httpClient.execute(httpPost); //发出请求并获得响应
 		int statusCode=httpResponse.getStatusLine().getStatusCode();
-		if (statusCode==401)
-			return UploadFileResult.unAuthorized;      		//判断响应码
-		else if (statusCode!=200)
-			return UploadFileResult.unknownError;
+		if (statusCode==401){
+		    httpClient.close();
+		    return UploadFileResult.unAuthorized;             //判断响应码
+		}	
+		else if (statusCode!=200){
+		    httpClient.close();
+		    return UploadFileResult.unknownError;
+		}
+			
 		HttpEntity responseEntity=httpResponse.getEntity();    	//获得Entity
 		String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8");//获得Body
 		
@@ -236,10 +254,15 @@ public class NetworkLayer implements INetworkLayer{
 		 */
 		HttpResponse httpResponse=httpClient.execute(httpGet); //发出请求并获得响应
 		int statusCode=httpResponse.getStatusLine().getStatusCode();
-		if (statusCode==401)									//判断响应码
-			return new FileDirectoryResult(FileDirectoryStatus.unAuthorized);      		
-		else if (statusCode!=200)
-			return new FileDirectoryResult(FileDirectoryStatus.unknownError);
+		if (statusCode==401){                                 //判断响应码
+		    httpClient.close();
+		    return new FileDirectoryResult(FileDirectoryStatus.unAuthorized);   
+		}
+		else if (statusCode!=200){
+		    httpClient.close();
+		    return new FileDirectoryResult(FileDirectoryStatus.unknownError);
+		}
+			
 		
 		/**
 		 * 解析响应内容
@@ -250,6 +273,17 @@ public class NetworkLayer implements INetworkLayer{
 		
 		JSONObject jsonResponse=new JSONObject(responseBody);   //转为JSON对象
 		String status=jsonResponse.getString("status");         //获取状态
+		
+		try{                                                    //若不是OK，则直接返回结果
+            if (!status.equals("OK")){
+                httpClient.close();
+                return new FileDirectoryResult(FileDirectoryStatus.valueOf(status));
+            }
+        }catch (IllegalArgumentException e){
+            httpClient.close();
+            return new FileDirectoryResult(FileDirectoryStatus.unknownError);
+        }
+		
 		JSONArray directoryArray=jsonResponse.getJSONArray("directory");
 		ArrayList<CloudFile> directory=new ArrayList<CloudFile>();
 	    for (int index=0;index<directoryArray.length();index++){
@@ -267,13 +301,7 @@ public class NetworkLayer implements INetworkLayer{
 		 * 关闭客户端并返回结果给上层
 		 */
 		httpClient.close();										//关闭服务器
-		try{
-			FileDirectoryResult directoryResult					//传回文件目录
-				=new FileDirectoryResult(directory,FileDirectoryStatus.valueOf(status));						
-			return directoryResult;
-		}catch (IllegalArgumentException e){
-			return new FileDirectoryResult(FileDirectoryStatus.unknownError);
-		}		
+		return new FileDirectoryResult(directory,FileDirectoryStatus.OK);		
 	}
 
 	@Override
@@ -294,10 +322,15 @@ public class NetworkLayer implements INetworkLayer{
 		 */
 		HttpResponse httpResponse=httpClient.execute(httpDelete); //发出请求并获得响应
 		int statusCode=httpResponse.getStatusLine().getStatusCode();
-		if (statusCode==401)									//判断响应码
-			return DeleteFileResult.unAuthorized;      		
-		else if (statusCode!=200)
-			return DeleteFileResult.unknownError;
+		if (statusCode==401){									//判断响应码
+			httpClient.close();
+		    return DeleteFileResult.unAuthorized;
+		}
+		else if (statusCode!=200){
+		    httpClient.close();
+		    return DeleteFileResult.unknownError;
+		}
+			
 		
 		/**
 		 * 解析响应内容
@@ -312,7 +345,7 @@ public class NetworkLayer implements INetworkLayer{
 		/**
 		 * 关闭客户端并返回结果给上层
 		 */
-		httpClient.close();										//关闭服务器
+		httpClient.close();
 		try{
 		    DeleteFileResult fileResult							//传回结果
 				=DeleteFileResult.valueOf(status);						
@@ -340,13 +373,19 @@ public class NetworkLayer implements INetworkLayer{
          */
         HttpResponse httpResponse=httpClient.execute(httpGet); //发出请求并获得响应
         int statusCode=httpResponse.getStatusLine().getStatusCode();
-        if (statusCode==401)                                    //判断响应码
+        if (statusCode==401){                                   //判断响应码
+            httpClient.close();
             return new DownloadFileResult(DownloadFileStatus.unAuthorized);  
-        else if (statusCode==403)
+        }
+        else if (statusCode==403){
+            httpClient.close();
             return new DownloadFileResult(DownloadFileStatus.wrong);
-        else if (statusCode!=200)
+        }
+        else if (statusCode!=200){
+            httpClient.close();
             return new DownloadFileResult(DownloadFileStatus.unknownError);
-        
+        }
+           
         /**
          * 解析响应内容
          */
@@ -385,11 +424,16 @@ public class NetworkLayer implements INetworkLayer{
          */
         HttpResponse httpResponse=httpClient.execute(httpPost); //发出请求并获得响应
         int statusCode=httpResponse.getStatusLine().getStatusCode();
-        if (statusCode==401)
+        if (statusCode==401){
+            httpClient.close();
             return AddNoteResult.unAuthorized;                     //判断响应码
-        else if (statusCode!=200)
+        }
+            
+        else if (statusCode!=200){
+            httpClient.close();
             return AddNoteResult.unknownError;
-        
+        }
+         
         HttpEntity responseEntity=httpResponse.getEntity();     //获得Entity
         String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8");//获得Body
         
@@ -398,9 +442,9 @@ public class NetworkLayer implements INetworkLayer{
         /**
          * 关闭客户端并返回结果给上层
          */
-        httpClient.close();                                     //关闭服务器
+        httpClient.close();
         try{
-            AddNoteResult result=AddNoteResult.valueOf(status);   
+            AddNoteResult result=AddNoteResult.valueOf(status); 
             return result;                                      //传回增加备注结果
         }catch (IllegalArgumentException e){
             return AddNoteResult.unknownError;
@@ -428,10 +472,15 @@ public class NetworkLayer implements INetworkLayer{
          */
         HttpResponse httpResponse=httpClient.execute(httpDelete); //发出请求并获得响应
         int statusCode=httpResponse.getStatusLine().getStatusCode();
-        if (statusCode==401)                                    //判断响应码
-            return DeleteNoteResult.unAuthorized;             
-        else if (statusCode!=200)
+        if (statusCode==401){                                    //判断响应码
+            httpClient.close();
+            return DeleteNoteResult.unAuthorized;  
+        }
+                       
+        else if (statusCode!=200){
+            httpClient.close();
             return DeleteNoteResult.unknownError;
+        }
         
         /**
          * 解析响应内容
@@ -448,11 +497,78 @@ public class NetworkLayer implements INetworkLayer{
          */
         httpClient.close();                                     //关闭服务器
         try{
-            DeleteNoteResult noteResult                               //传回结果
+            DeleteNoteResult noteResult                         //传回结果
                 =DeleteNoteResult.valueOf(status);                        
             return noteResult;
         }catch (IllegalArgumentException e){
             return DeleteNoteResult.unknownError;
         }                       
+    }
+
+    @Override
+    public NoteListResult getNoteList(String fileID) throws IOException {
+        /**
+         * 创建客户端
+         */
+        CloseableHttpClient httpClient=HttpClients.createDefault(); //创建HttpClient
+        HttpGet httpGet = new HttpGet(serverUri+"/getNoteList?fileID="+fileID);        
+                                                                    //Get方法
+        /**
+         * 设置发送内容
+         */
+        httpGet.addHeader("Cookie", cookie);        //Cookie加入Header里
+        
+        /**
+         * 获得响应码
+         */
+        HttpResponse httpResponse=httpClient.execute(httpGet); //发出请求并获得响应
+        int statusCode=httpResponse.getStatusLine().getStatusCode();
+        if (statusCode==401){
+            httpClient.close();                             //判断响应码
+            return new NoteListResult(NoteListStatus.unAuthorized);
+        }
+        else if (statusCode!=200){
+            httpClient.close();
+            return new NoteListResult(NoteListStatus.unknownError);
+        }
+            
+        
+        /**
+         * 解析响应内容
+         */
+        HttpEntity responseEntity=httpResponse.getEntity();     //获得Entity
+        String responseBody=IOUtils.toString(responseEntity.getContent(),"UTF-8");
+                                                                //获得Body
+        
+        JSONObject jsonResponse=new JSONObject(responseBody);   //转为JSON对象
+        String status=jsonResponse.getString("status");         //获取状态
+        try{                                                    //若不是OK，则直接返回结果
+            if (!status.equals("OK")){
+                httpClient.close();
+                return new NoteListResult(NoteListStatus.valueOf(status));
+            }
+        }catch (IllegalArgumentException e){
+            httpClient.close();
+            return new NoteListResult(NoteListStatus.unknownError);
+        }
+        
+        JSONArray noteListArray=jsonResponse.getJSONArray("noteList");
+        ArrayList<Note> noteList=new ArrayList<Note>();
+        for (int index=0;index<noteListArray.length();index++){
+            JSONObject aJSON=noteListArray.getJSONObject(index);
+            Note aNote=new Note();
+            aNote.setCreator(aJSON.getString("creator"));
+            aNote.setFileID(aJSON.getString("fileID"));
+            aNote.setNoteID(aJSON.getString("noteID"));
+            aNote.setUploadTime(aJSON.getString("uploadTime"));
+            aNote.setContent(aJSON.getString("content"));
+            noteList.add(aNote);
+        }
+        
+        /**
+         * 关闭客户端并返回结果给上层
+         */
+        httpClient.close();                                     //关闭服务器
+        return new NoteListResult(noteList,NoteListStatus.OK);    
     }
 }
