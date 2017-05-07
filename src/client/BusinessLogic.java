@@ -2,8 +2,7 @@ package client;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-
+import java.util.ArrayList;
 import org.apache.http.client.ClientProtocolException;
 
 import common.ChangePasswdResult;
@@ -25,14 +24,14 @@ public class BusinessLogic implements IBusinessLogic{
 	 */
 	private final INetworkLayer m_Network;
 	private User m_User;
-	private HashSet<CloudFile> selfDirectory;
-	private HashSet<CloudFile> otherDirectory;
+	private ArrayList<CloudFile> selfDirectory;
+	private ArrayList<CloudFile> otherDirectory;
 	
 	public BusinessLogic(INetworkLayer network){
 		m_Network=network;
 		m_User=new User();
-		selfDirectory=new HashSet<CloudFile>();
-		otherDirectory=new HashSet<CloudFile>();
+		selfDirectory=new ArrayList<CloudFile>();
+		otherDirectory=new ArrayList<CloudFile>();
 	}
 
 	@Override

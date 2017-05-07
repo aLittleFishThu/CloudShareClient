@@ -1,5 +1,6 @@
 package test;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,7 +15,7 @@ import common.CloudFile;
 import common.Note;
 public class TestJson {
 	public static void main(String args[]){
-		/*HashSet<CloudFile> set=new HashSet<CloudFile>();
+	     ArrayList<CloudFile> set=new ArrayList<CloudFile>();
 		 CloudFile cloud1=new CloudFile("yzj","123");
 	     CloudFile cloud2=new CloudFile("yzj2","123");
 	     set.add(cloud1);
@@ -24,12 +25,12 @@ public class TestJson {
 	     JSONObject json1=jsonArray.optJSONObject(0);
 	     System.out.println(jsonArray.length());
 	     System.out.println(json1);
-	     System.out.println(json1.get("openList").toString());*/
-	     HashMap<String,Note> map=new HashMap<String,Note>();
+	     System.out.println(json1.get("openList").toString());
+	    /* HashMap<String,Note> map=new HashMap<String,Note>();
 	     Note note=new Note("123","456","789");
 	     map.put("345", note);
 	     map.put("678", note);
 	     JSONArray jsonArray=new JSONArray(map.values());
-	     System.out.println(jsonArray);
+	     System.out.println(jsonArray);*/
 	}
 }

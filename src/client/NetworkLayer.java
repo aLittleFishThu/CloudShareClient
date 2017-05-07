@@ -2,7 +2,7 @@ package client;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.ArrayList;
 
 import common.ChangePasswdResult;
 import common.CloudFile;
@@ -247,7 +247,7 @@ public class NetworkLayer implements INetworkLayer{
 		JSONObject jsonResponse=new JSONObject(responseBody);   //转为JSON对象
 		String status=jsonResponse.getString("status");         //获取状态
 		JSONArray directoryArray=jsonResponse.getJSONArray("directory");
-		HashSet<CloudFile> directory=new HashSet<CloudFile>();
+		ArrayList<CloudFile> directory=new ArrayList<CloudFile>();
 	    for (int index=0;index<directoryArray.length();index++){
 	    	JSONObject aJSON=directoryArray.getJSONObject(index);
 	    	CloudFile afile=new CloudFile();

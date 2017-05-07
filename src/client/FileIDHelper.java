@@ -1,12 +1,12 @@
 package client;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import common.CloudFile;
 
 public class FileIDHelper {
-	public static String toFileID(String filename,String creator,HashSet<CloudFile> directory){
+	public static String toFileID(String filename,String creator,ArrayList<CloudFile> directory){
 		Iterator<CloudFile> iter=directory.iterator();
 		while (iter.hasNext()){
 			CloudFile aFile=iter.next();
