@@ -1,0 +1,136 @@
+﻿package client.ui;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JSeparator;
+import javax.swing.JTextField;
+import javax.swing.SpringLayout;
+import javax.swing.SwingConstants;
+
+import org.apache.http.client.ClientProtocolException;
+
+import common.Credential;
+import common.LoginResult;
+import client.IBusinessLogic;
+
+@SuppressWarnings("serial")
+public class LoginDialog extends JDialog{
+    
+    private final JFrame m_MainFrame;
+    private final IBusinessLogic m_Business;
+    private JButton loginButton;
+    private JButton registerButton;
+    private JTextField userIDField;
+    private JPasswordField passwdField;
+    
+    public LoginDialog(JFrame mainFrame){
+        super(mainFrame,true);      //默认为modal
+        m_MainFrame=mainFrame;
+        m_Business=null;
+        Init();
+    }
+    
+    public LoginDialog(JFrame mainFrame,IBusinessLogic business){
+        super(mainFrame,true);      //默认为modal
+        m_MainFrame=mainFrame;
+        m_Business=business;
+        Init();
+    }
+    
+    public void Init(){
+        Font titleFont=new Font("微软雅黑",Font.PLAIN,20);
+        JLabel title=new JLabel("登录云协作账号");
+        title.setFont(titleFont);
+        
+        /**
+         * 登录名
+         */
+        Font tipFont=new Font("微软雅黑",Font.PLAIN,10);
+        JLabel userIDLabel=new JLabel("登录名");
+        userIDLabel.setFont(tipFont);
+        userIDField=new JTextField(20);
+        /**
+         * 登录密码
+         */
+        JLabel passwdLabel=new JLabel("登录密码");
+        passwdLabel.setFont(tipFont);
+        passwdField=new JPasswordField(20);
+        
+        /**
+         * 按钮
+         */
+        loginButton=new JButton("登录");
+        loginButton.setFont(tipFont);
+       /* LoginListener loginListener=new LoginListener(this);
+        loginButton.addActionListener(loginListener);*/
+    
+        registerButton=new JButton("注册");       
+        registerButton.setFont(tipFont);
+       
+        SpringLayout layout=new SpringLayout();
+        this.setLayout(layout);
+        
+        this.add(title);
+        this.add(userIDLabel);
+        this.add(userIDField);
+        this.add(passwdLabel);
+        this.add(passwdField);
+        this.add(loginButton);
+        this.add(registerButton);
+    
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
+    }
+    
+    class LoginListener implements ActionListener{
+        private final LoginDialog m_LoginDialog;
+        public LoginListener(LoginDialog loginDialog) {
+            m_LoginDialog=loginDialog;
+        }
+
+        /**
+         * 按下登录按钮后调用BLL层方法
+         */
+        @Override
+        public void actionPerformed(ActionEvent e) {   
+            String userID=userIDField.getText();
+            String password=new String(passwdField.getPassword());
+            Credential cred=new Credential(userID,password);
+            try {
+                LoginResult result=m_Business.login(cred);
+                switch(result){
+                    case OK:
+                        m_MainFrame.setVisible(true);
+                        m_LoginDialog.dispose();
+                        break;
+                    case wrong:
+                        JOptionPane.showMessageDialog
+                        (m_LoginDialog,"登录失败，请检查用户名及密码",null,JOptionPane.WARNING_MESSAGE);
+                        break;
+                    default:
+                        JOptionPane.showMessageDialog
+                        (m_LoginDialog,"未知错误",null,JOptionPane.ERROR_MESSAGE);
+                        break;
+                }
+            }  catch (IOException e1) {
+                JOptionPane.showMessageDialog
+                (m_LoginDialog, "网络错误",null,JOptionPane.ERROR_MESSAGE);
+            } 
+        }
+    }
+}

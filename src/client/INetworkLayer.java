@@ -6,6 +6,8 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 
 import common.AddNoteResult;
+import common.Authorization;
+import common.AuthorizationResult;
 import common.ChangePasswdResult;
 import common.CloudFile;
 import common.Credential;
@@ -21,10 +23,10 @@ import common.RenameFileResult;
 import common.UploadFileResult;
 
 /**
- * ¿Í»§¶ËNET²ãÌá¹©½Ó¿Ú
- *   µÇÂ¼
- *   ×¢²á
- *   ÐÞ¸ÄÃÜÂë
+ * å®¢æˆ·ç«¯NETå±‚æä¾›æŽ¥å£
+ *   ç™»å½•
+ *   æ³¨å†Œ
+ *   ä¿®æ”¹å¯†ç 
  */
 public interface INetworkLayer {
 	//Client.BLL->Client.NET
@@ -45,4 +47,6 @@ public interface INetworkLayer {
 	public AddNoteResult addNote(Note note) throws IOException;
 	public DeleteNoteResult deleteNote(Note note) throws IOException;
 	public NoteListResult getNoteList(String fileID) throws IOException;
+	public AuthorizationResult setAuthorization(String fileID,Authorization authorization) 
+	        throws IOException;
 }
