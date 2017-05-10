@@ -2,6 +2,7 @@ package client;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import common.AddNoteResult;
@@ -25,12 +26,14 @@ import common.RenameFileResult;
 import common.UploadFileResult;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
@@ -191,20 +194,21 @@ public class NetworkLayer implements INetworkLayer{
 		}
 	}
 	
-	public UploadFileResult uploadFile(CloudFile cloudFile,File file) 
+	public UploadFileResult uploadFile(CloudFile cloudFile,byte[] content) 
 			throws ClientProtocolException, IOException{
 		/**
 		 * 创建客户端
 		 */
 		CloseableHttpClient httpClient=HttpClients.createDefault(); //创建HttpClient
 		String filename=cloudFile.getFilename();
-		HttpPost httpPost = new HttpPost(serverUri+"/file?filename="+filename);   		
+		HttpPost httpPost = new HttpPost(serverUri+"/file");   		
 																	//Post方法
 		/**
 		 * 设置发送内容
 		 */
 		httpPost.addHeader("Cookie", cookie);   		//Cookie加入Header里
-		HttpEntity requestBody=new FileEntity(file,ContentType.DEFAULT_BINARY);
+		httpPost.addHeader("Content-Disposition", "form-data;name="+URLEncoder.encode(filename,"UTF-8"));
+		HttpEntity requestBody=new ByteArrayEntity(content);
 														//文件加入requestBody
 		httpPost.setEntity(requestBody);              //加入请求Body，ContentType自动设置
 		/**

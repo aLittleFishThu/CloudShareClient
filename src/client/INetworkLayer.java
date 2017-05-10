@@ -36,7 +36,7 @@ public interface INetworkLayer {
 			throws ClientProtocolException, IOException;
 	public ChangePasswdResult changePasswd(String password, String newPassword)
 			throws ClientProtocolException, IOException;
-	public UploadFileResult uploadFile(CloudFile cloudFile,File file)
+	public UploadFileResult uploadFile(CloudFile cloudFile,byte[] content)
 			throws ClientProtocolException, IOException;
 	public FileDirectoryResult getDirectory(String targetID) throws IOException;
 	public DeleteFileResult deleteFile (String fileID) throws IOException;

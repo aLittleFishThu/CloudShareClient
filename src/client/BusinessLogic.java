@@ -1,7 +1,12 @@
 package client;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 
 import common.AddNoteResult;
@@ -21,6 +26,7 @@ import common.RegisterResult;
 import common.RenameFileResult;
 import common.UploadFileResult;
 import common.User;
+import common.FileDirectoryResult.FileDirectoryStatus;
 import client.IBusinessLogic;
 
 public class BusinessLogic implements IBusinessLogic{
@@ -28,18 +34,23 @@ public class BusinessLogic implements IBusinessLogic{
 	 * 客户端BLL需使用的NET提供接口
 	 */
 	private final INetworkLayer m_Network;
+	
 	private User m_User;
-
-	//private ArrayList<CloudFile> currentDirectory;
+	private User currentUser;
+	private ArrayList<CloudFile> currentDirectory;
+	private CloudFile currentCloudFile;
+	private Note currentNote;
+	
 	/*private ArrayList<CloudFile> selfDirectory;
 	private ArrayList<CloudFile> otherDirectory;*/
 	
 	public BusinessLogic(INetworkLayer network){
 		m_Network=network;
 		m_User=new User();
-		//currentDirectory=new ArrayList<CloudFile>();
-		/*selfDirectory=new ArrayList<CloudFile>();
-		otherDirectory=new ArrayList<CloudFile>();*/
+		currentUser=new User();
+		currentDirectory=new ArrayList<CloudFile>();
+		currentCloudFile=new CloudFile();
+		currentNote=new Note();
 	}
 
 	@Override
@@ -53,6 +64,10 @@ public class BusinessLogic implements IBusinessLogic{
 		LoginResult loginResult=network.login(cred);
 		if (loginResult.equals(LoginResult.OK))
 			m_User=new User(cred.getUserID(),cred.getPassword());
+		    currentUser=new User(cred.getUserID(),cred.getPassword());
+		    FileDirectoryResult directoryResult=m_Network.getDirectory(m_User.getUserID());
+		    if (directoryResult.equals(FileDirectoryStatus.OK))
+		        currentDirectory=directoryResult.getFileDirectory();
 		return loginResult;   //调用NET层的相关接口方法，直接返回结果
 	}
 
@@ -105,14 +120,25 @@ public class BusinessLogic implements IBusinessLogic{
 	 * @param filePath 文件路径
 	 * return 结果
 	 */
-	public UploadFileResult uploadFile(String filename, String filePath) 
-			throws ClientProtocolException, IOException {
+	public UploadFileResult uploadFile(String filename, String filePath) throws IOException 
+			 {
 		File file=new File(filePath);			//判断上传文件是否存在
 		if (!file.exists())
 			return UploadFileResult.wrong;
+		FileInputStream fin;
+		byte[] content;
+        try {
+            fin = new FileInputStream(file);
+            content = IOUtils.toByteArray(fin);
+        } catch (FileNotFoundException e) {
+            return UploadFileResult.wrong;
+        } catch (IOException e) {
+            return UploadFileResult.wrong;
+        }
+		
 		CloudFile cloudFile=new CloudFile();		//设置文件的filename属性
 		cloudFile.setFilename(filename);
-		return m_Network.uploadFile(cloudFile, file);	//返回调用结果
+		return m_Network.uploadFile(cloudFile, content);	//返回调用结果
 	}
 
 	@Override
@@ -141,9 +167,9 @@ public class BusinessLogic implements IBusinessLogic{
 	 * UI传入CloudFile对象，判断是否为自己的文件，有权限则调用底层
 	 * @param CloudFile
 	 */
-	public DeleteFileResult deleteFile(CloudFile file) throws IOException {
-	    String targetID=file.getCreator();
-	    String fileID=file.getFileID();
+	public DeleteFileResult deleteFile() throws IOException {
+	    String targetID=currentCloudFile.getCreator();
+	    String fileID=currentCloudFile.getFileID();
 		if (!targetID.equals(m_User.getUserID()))	//检查权限
 			return DeleteFileResult.wrong;
 		
@@ -151,8 +177,8 @@ public class BusinessLogic implements IBusinessLogic{
 	}
 
     @Override
-    public DownloadFileResult downloadFile(CloudFile file) throws UnsupportedOperationException, IOException {
-       String fileID=file.getFileID();
+    public DownloadFileResult downloadFile() throws UnsupportedOperationException, IOException {
+       String fileID=currentCloudFile.getFileID();
        return m_Network.downloadFile(fileID);
       /* String targetID=file.getCreator();
        if (targetID.equals(m_User.getUserID())){
@@ -176,12 +202,12 @@ public class BusinessLogic implements IBusinessLogic{
     /**
      * 重命名文件
      */
-    public RenameFileResult renameFile(CloudFile file,String newFilename) throws IOException {
-       if (!file.getCreator().equals(m_User.getUserID()))    //非本人文件
+    public RenameFileResult renameFile(String newFilename) throws IOException {
+       if (!currentCloudFile.getCreator().equals(m_User.getUserID()))    //非本人文件
            return RenameFileResult.wrong;
-       if (file.getFilename().equals(newFilename))           //与原来文件相同
+       if (currentCloudFile.getFilename().equals(newFilename))           //与原来文件相同
            return RenameFileResult.OK;                       
-       return m_Network.renameFile(file.getFileID(), newFilename);
+       return m_Network.renameFile(currentCloudFile.getFileID(), newFilename);
     }
     
     @Override

@@ -36,14 +36,14 @@ public interface IBusinessLogic {
 			String newPassword, String newPasswordAgain) 
 			        throws ClientProtocolException, IOException;
 	public UploadFileResult uploadFile(String filename,String filePath) 
-			throws ClientProtocolException, IOException;
+			throws IOException;
 	public FileDirectoryResult getDirectory(String targetID) 
 			throws IOException;
-	public DeleteFileResult deleteFile(CloudFile file) 
+	public DeleteFileResult deleteFile() 
 			throws IOException;
-	public DownloadFileResult downloadFile(CloudFile file) 
+	public DownloadFileResult downloadFile() 
 	        throws UnsupportedOperationException, IOException;
-	public RenameFileResult renameFile(CloudFile file,String newFilename) 
+	public RenameFileResult renameFile(String newFilename) 
 	        throws IOException;
 	public AddNoteResult addNote(Note note) throws IOException;
 	public DeleteNoteResult deleteNote(Note note) throws IOException;
