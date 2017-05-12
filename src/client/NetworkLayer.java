@@ -1,9 +1,9 @@
 package client;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import common.AddNoteResult;
 import common.AuthorizationResult;
@@ -26,7 +26,6 @@ import common.RenameFileResult;
 import common.UploadFileResult;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -35,7 +34,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -302,7 +300,7 @@ public class NetworkLayer implements INetworkLayer{
 	    	afile.setAuthorization(Authorization.valueOf(aJSON.getString("authorization")));
 	    	directory.add(afile);
 	    }
-		
+        Collections.sort(directory);
 		/**
 		 * 关闭客户端并返回结果给上层
 		 */

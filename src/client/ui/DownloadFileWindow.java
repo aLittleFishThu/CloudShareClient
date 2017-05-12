@@ -6,13 +6,17 @@
 package client.ui;
 
 import client.IBusinessLogic;
-import common.UploadFileResult;
-import java.awt.Color;
+import common.CloudFile;
+import common.DownloadFileResult;
+import common.DownloadFileResult.DownloadFileStatus;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -24,23 +28,25 @@ import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
 
-import org.apache.http.client.ClientProtocolException;
 
 /**
  *
  * @author yzj
  */
-public class UploadFileWindow extends javax.swing.JDialog {
+public class DownloadFileWindow extends javax.swing.JDialog {
     private final JFrame m_MainFrame;
     private final IBusinessLogic m_Business;
-
+    private final CloudFile m_CloudFile;
     /**
      * Creates new form uploadFileWindow
+     * @param mainFrame
+     * @param business
      */
-    public UploadFileWindow(JFrame mainFrame,IBusinessLogic business) {
+    public DownloadFileWindow(JFrame mainFrame,IBusinessLogic business,CloudFile cloudFile) {
         super(mainFrame, true);
         m_MainFrame=mainFrame;
         m_Business=business;
+        m_CloudFile=cloudFile;
         initComponents();
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -55,41 +61,37 @@ public class UploadFileWindow extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        filenameLabel = new JLabel();
+        filenameField = new JTextField();
         filePathLabel = new JLabel();
         pathField = new JTextField();
         pathButton = new JButton();
-        filenameLabel = new JLabel();
-        filenameField = new JTextField();
         confirmButton = new JButton();
-        filenameTip = new JLabel();
 
         FormListener formListener = new FormListener();
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("上传文件");
+        setTitle("下载文件");
         setResizable(false);
-
-        filePathLabel.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
-        filePathLabel.setText("本地路径");
-
-        pathField.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
-
-        pathButton.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
-        pathButton.setText("浏览");
-        pathButton.addActionListener(formListener);
 
         filenameLabel.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
         filenameLabel.setText("文件名");
 
         filenameField.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
 
+        filePathLabel.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        filePathLabel.setText("下载到");
+
+        pathField.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        pathField.setText(m_CloudFile.getFilename());
+
+        pathButton.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        pathButton.setText("浏览");
+        pathButton.addActionListener(formListener);
+
         confirmButton.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
         confirmButton.setText("确定");
         confirmButton.addActionListener(formListener);
-
-        filenameTip.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
-        filenameTip.setForeground(new Color(153, 153, 153));
-        filenameTip.setText("同名文件将直接覆盖");
 
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -102,35 +104,30 @@ public class UploadFileWindow extends javax.swing.JDialog {
                             .addComponent(filePathLabel)
                             .addComponent(filenameLabel))
                         .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                            .addComponent(filenameTip)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(pathField, GroupLayout.DEFAULT_SIZE, 213, Short.MAX_VALUE)
-                                    .addComponent(filenameField))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(pathButton))))
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
+                            .addComponent(pathField, GroupLayout.DEFAULT_SIZE, 213, Short.MAX_VALUE)
+                            .addComponent(filenameField))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pathButton))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(167, 167, 167)
+                        .addGap(153, 153, 153)
                         .addComponent(confirmButton)))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(28, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(filePathLabel)
                     .addComponent(pathField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pathButton))
+                    .addComponent(filenameLabel))
                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(filenameLabel)
-                    .addComponent(filenameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(filenameTip)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                    .addComponent(filenameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(filePathLabel)
+                    .addComponent(pathButton))
+                .addGap(18, 18, 18)
                 .addComponent(confirmButton)
-                .addContainerGap())
+                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -142,10 +139,10 @@ public class UploadFileWindow extends javax.swing.JDialog {
         FormListener() {}
         public void actionPerformed(ActionEvent evt) {
             if (evt.getSource() == pathButton) {
-                UploadFileWindow.this.pathButtonActionPerformed(evt);
+                DownloadFileWindow.this.pathButtonActionPerformed(evt);
             }
             else if (evt.getSource() == confirmButton) {
-                UploadFileWindow.this.confirmButtonActionPerformed(evt);
+                DownloadFileWindow.this.confirmButtonActionPerformed(evt);
             }
         }
     }// </editor-fold>//GEN-END:initComponents
@@ -153,19 +150,23 @@ public class UploadFileWindow extends javax.swing.JDialog {
     private void confirmButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_confirmButtonActionPerformed
         String filePath=pathField.getText();
         String filename=filenameField.getText();
-        UploadFileResult result;
+        DownloadFileResult result;
         try {
-            result = m_Business.uploadFile(filename, filePath);
-            switch(result){
+            result = m_Business.downloadFile(m_CloudFile);
+            byte[] content=result.getContent();
+            DownloadFileStatus status=result.getResult();
+            switch(status){
             case OK:
-                JOptionPane.showMessageDialog
-                (this,"上传成功",null,JOptionPane.INFORMATION_MESSAGE);
-                this.dispose();
-                break;
-            case tooLarge:
-                JOptionPane.showMessageDialog
-                (this,"文件过大，请重新选择",null,JOptionPane.WARNING_MESSAGE);
-                break;
+                File file=new File(filePath+"\\"+filename);
+                if (file.exists()){
+                    int confirm=JOptionPane.showConfirmDialog(this, "检测到同名文件，是否覆盖？", "警告", JOptionPane.OK_CANCEL_OPTION);
+                    if (confirm==JOptionPane.CANCEL_OPTION){
+                        return;
+                    }
+                }
+                FileOutputStream fos=new FileOutputStream(file);
+                fos.write(content);
+                fos.close();
             case unAuthorized:
                 JOptionPane.showMessageDialog
                 (this,"您未登录，请重新登录",null,JOptionPane.WARNING_MESSAGE);
@@ -188,12 +189,11 @@ public class UploadFileWindow extends javax.swing.JDialog {
 
     private void pathButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_pathButtonActionPerformed
         JFileChooser fileWindow = new JFileChooser();
+        fileWindow.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int confirm = fileWindow.showOpenDialog(null);
         if (confirm == JFileChooser.APPROVE_OPTION) {
-                String filePath = fileWindow.getSelectedFile().getPath();
-                String filename = fileWindow.getSelectedFile().getName();
+                String filePath = fileWindow.getCurrentDirectory().getPath();
                 pathField.setText(filePath);
-                filenameField.setText(filename);  
         }
     }//GEN-LAST:event_pathButtonActionPerformed
 
@@ -203,7 +203,6 @@ public class UploadFileWindow extends javax.swing.JDialog {
     JLabel filePathLabel;
     JTextField filenameField;
     JLabel filenameLabel;
-    JLabel filenameTip;
     JButton pathButton;
     JTextField pathField;
     // End of variables declaration//GEN-END:variables

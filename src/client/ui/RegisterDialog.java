@@ -11,6 +11,7 @@ import common.RegisterResult;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -71,7 +72,7 @@ public class RegisterDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("云协作");
-        setLocation(null);
+        setLocation(new Point(0, 0));
         setResizable(false);
 
         titleLabel.setFont(new Font("微软雅黑", 0, 18)); // NOI18N
@@ -202,6 +203,7 @@ public class RegisterDialog extends javax.swing.JDialog {
                 case OK:
                     JOptionPane.showMessageDialog
                     (this,"注册成功！",null,JOptionPane.INFORMATION_MESSAGE);
+                    this.dispose();
                     break;
                 case illegalID:
                     JOptionPane.showMessageDialog

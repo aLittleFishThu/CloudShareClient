@@ -20,6 +20,8 @@ import common.NoteListResult;
 import common.RegisterResult;
 import common.RenameFileResult;
 import common.UploadFileResult;
+import common.User;
+import java.util.ArrayList;
 
 /**
  * 客户端BLL层提供接口
@@ -28,6 +30,15 @@ import common.UploadFileResult;
  * 	修改密码
  */
 public interface IBusinessLogic {
+    public User getUser();
+    public void setUser(User m_User);
+  /*  public User getCurrentUser();
+    public void setCurrentUser(User currentUser);
+    public ArrayList<CloudFile> getCurrentDirectory();
+    public void setCurrentDirectory(ArrayList<CloudFile> currentDirectory);
+    public CloudFile getCurrentCloudFile();
+    public void setCurrentCloudFile(CloudFile currentCloudFile);
+    public Note getCurrentNote();*/
 	public LoginResult login(Credential cred) 
 			throws ClientProtocolException, IOException;
 	public RegisterResult register(Credential cred, String passwordAgain) 
@@ -39,11 +50,11 @@ public interface IBusinessLogic {
 			throws IOException;
 	public FileDirectoryResult getDirectory(String targetID) 
 			throws IOException;
-	public DeleteFileResult deleteFile() 
+	public DeleteFileResult deleteFile(CloudFile cloudFile) 
 			throws IOException;
-	public DownloadFileResult downloadFile() 
+	public DownloadFileResult downloadFile(CloudFile cloudFile) 
 	        throws UnsupportedOperationException, IOException;
-	public RenameFileResult renameFile(String newFilename) 
+	public RenameFileResult renameFile(CloudFile cloudFile,String newFilename) 
 	        throws IOException;
 	public AddNoteResult addNote(Note note) throws IOException;
 	public DeleteNoteResult deleteNote(Note note) throws IOException;
