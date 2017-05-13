@@ -24,6 +24,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -76,7 +77,6 @@ public class FilePane extends javax.swing.JPanel {
 
     private final JFrame m_MainFrame;
     private final IBusinessLogic m_Business;
-    private CloudFile currentFile;
     private String targetID;
     private FileTableModel fileTableModel;
     
@@ -97,7 +97,6 @@ public class FilePane extends javax.swing.JPanel {
     public FilePane(JFrame mainFrame, IBusinessLogic business) {
         m_MainFrame = mainFrame;
         m_Business = business;
-        currentFile = null;
         targetID = m_Business.getUser().getUserID();
         fileTableModel = new FileTableModel(new ArrayList<CloudFile>());
         
@@ -233,7 +232,6 @@ public class FilePane extends javax.swing.JPanel {
         fileInfoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         fileInfoTable.setShowHorizontalLines(false);
         fileInfoTable.setShowVerticalLines(false);
-        fileInfoTable.addMouseListener(formListener);
         fileInfoScroll.setViewportView(fileInfoTable);
 
         fileSplitPane.setRightComponent(fileInfoScroll);
@@ -254,7 +252,7 @@ public class FilePane extends javax.swing.JPanel {
 
     // Code for dispatching events from components to event handlers.
 
-    private class FormListener implements ActionListener, MouseListener {
+    private class FormListener implements ActionListener {
         FormListener() {}
         public void actionPerformed(ActionEvent evt) {
             if (evt.getSource() == uploadFileButton) {
@@ -273,29 +271,12 @@ public class FilePane extends javax.swing.JPanel {
                 FilePane.this.authorizationButtonActionPerformed(evt);
             }
         }
-
-        public void mouseClicked(MouseEvent evt) {
-            if (evt.getSource() == fileInfoTable) {
-                FilePane.this.fileInfoTableMouseClicked(evt);
-            }
-        }
-
-        public void mouseEntered(MouseEvent evt) {
-        }
-
-        public void mouseExited(MouseEvent evt) {
-        }
-
-        public void mousePressed(MouseEvent evt) {
-        }
-
-        public void mouseReleased(MouseEvent evt) {
-        }
     }// </editor-fold>//GEN-END:initComponents
 
     private void uploadFileButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_uploadFileButtonActionPerformed
         UploadFileWindow uploadWindow = new UploadFileWindow(m_MainFrame, m_Business);
         getDirectory(targetID);
+        fileInfoTable.clearSelection();
     }//GEN-LAST:event_uploadFileButtonActionPerformed
 
     private void downloadFileButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_downloadFileButtonActionPerformed
@@ -305,11 +286,12 @@ public class FilePane extends javax.swing.JPanel {
 
     private void deleteFileButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_deleteFileButtonActionPerformed
         try {
-            if (currentFile==null){
+            CloudFile selectedFile=getSelectedFile();
+            if (selectedFile==null){
                 JOptionPane.showMessageDialog(m_MainFrame, "请选择文件", null, JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            DeleteFileResult result = m_Business.deleteFile(currentFile);
+            DeleteFileResult result = m_Business.deleteFile(selectedFile);
             switch (result) {
                 case OK:
                     JOptionPane.showMessageDialog(m_MainFrame, "删除成功", null, JOptionPane.INFORMATION_MESSAGE);
@@ -317,6 +299,7 @@ public class FilePane extends javax.swing.JPanel {
                     break;
                 case unAuthorized:
                     JOptionPane.showMessageDialog(m_MainFrame, "您未登录，请重新登录", null, JOptionPane.WARNING_MESSAGE);
+                    m_MainFrame.dispose();
                     break;
                 case wrong:
                     JOptionPane.showMessageDialog(m_MainFrame, "文件不存在，请重新选择", null, JOptionPane.WARNING_MESSAGE);
@@ -326,6 +309,7 @@ public class FilePane extends javax.swing.JPanel {
                     JOptionPane.showMessageDialog(m_MainFrame, "未知错误", null, JOptionPane.ERROR_MESSAGE);
                     break;
             }
+            fileInfoTable.clearSelection();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(m_MainFrame, "网络错误", null, JOptionPane.ERROR_MESSAGE);
         }
@@ -386,16 +370,17 @@ public class FilePane extends javax.swing.JPanel {
 //        }
 
     }//GEN-LAST:event_authorizationButtonActionPerformed
-
-    private void fileInfoTableMouseClicked(MouseEvent evt) {//GEN-FIRST:event_fileInfoTableMouseClicked
+    
+    private CloudFile getSelectedFile(){
         FileTableModel fileTableModel = (FileTableModel) fileInfoTable.getModel();
         int rowIndex = fileInfoTable.getSelectedRow();
+        CloudFile selectedFile;
         if (rowIndex!=-1)
-            currentFile= fileTableModel.getValueAt(rowIndex);
+            selectedFile= fileTableModel.getValueAt(rowIndex);
         else
-            currentFile=null;
-    }//GEN-LAST:event_fileInfoTableMouseClicked
-
+            selectedFile=null;
+        return selectedFile;
+    }
     
     public void getDirectory(String targetID) {
         FileDirectoryResult result;
@@ -405,12 +390,14 @@ public class FilePane extends javax.swing.JPanel {
             switch(status){
             case OK:
                 ArrayList<CloudFile> directory=result.getFileDirectory();
+                Collections.sort(directory);
                 fileTableModel.setDirectory(directory);
                 fileInfoTable.setModel(fileTableModel);
+                fileInfoTable.repaint();
                 break;
             case unAuthorized:
                 JOptionPane.showMessageDialog(m_MainFrame, "您未登录，请重新登录", null, JOptionPane.WARNING_MESSAGE);
-                    break;
+                break;
             case wrong:
                 JOptionPane.showMessageDialog(m_MainFrame, "用户不存在，请重新输入", null, JOptionPane.WARNING_MESSAGE);
                 break;
