@@ -6,6 +6,7 @@
 package client.ui;
 
 import client.IBusinessLogic;
+import common.AddNoteResult;
 import common.Authorization;
 import common.AuthorizationResult;
 import common.CloudFile;
@@ -15,6 +16,8 @@ import common.DownloadFileResult;
 import common.DownloadFileResult.DownloadFileStatus;
 import common.FileDirectoryResult;
 import common.FileDirectoryResult.FileDirectoryStatus;
+import static common.LoginResult.OK;
+import static common.LoginResult.wrong;
 import common.Note;
 import common.NoteListResult;
 import common.NoteListResult.NoteListStatus;
@@ -97,13 +100,32 @@ public class FilePane extends javax.swing.JPanel {
     private FileTableModel fileTableModel;
     private NoteTableModel noteTableModel;
     
-    public String getTargetID() {
+    public String getCurrentID() {
         return currentID;
     }
 
-    public void setTargetID(String targetID) {
+    public void setCurrentID(String targetID) {
+        if (targetID.equals(currentID))   //发生变化了再重置
+            return;
         this.currentID = targetID;
-        //getDirectory(targetID);
+            if (currentID.equals(m_Business.getUser().getUserID())){    //跳转回自己的界面
+                uploadFileButton.setEnabled(true);
+                downloadFileButton.setEnabled(false);
+                deleteFileButton.setEnabled(false);
+                renameFileButton.setEnabled(false);
+                authorizationButton.setEnabled(false);
+                addNoteButton.setEnabled(false);
+                deleteNoteButton.setEnabled(false);
+            }
+            else{               //跳转到他人界面
+                uploadFileButton.setEnabled(false);
+                downloadFileButton.setEnabled(false);
+                deleteFileButton.setEnabled(false);
+                renameFileButton.setEnabled(false);
+                authorizationButton.setEnabled(false);
+                addNoteButton.setEnabled(false);
+                deleteNoteButton.setEnabled(false);
+            }
     }
 
     /**
@@ -147,7 +169,7 @@ public class FilePane extends javax.swing.JPanel {
         addNoteButton = new JButton();
         deleteNoteButton = new JButton();
         jSeparator2 = new JSeparator();
-        jTextField1 = new JTextField();
+        targetIDField = new JTextField();
         searchUserButton = new JButton();
         returnButton = new JButton();
         jSeparator3 = new JSeparator();
@@ -169,7 +191,7 @@ public class FilePane extends javax.swing.JPanel {
         setForeground(new Color(240, 240, 240));
         setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         setMaximumSize(new Dimension(1366, 768));
-        setPreferredSize(new Dimension(1366, 768));
+        setPreferredSize(new Dimension(1366, 700));
 
         fileButtonPane.setMaximumSize(new Dimension(32767, 50));
         fileButtonPane.setMinimumSize(new Dimension(404, 50));
@@ -263,7 +285,7 @@ public class FilePane extends javax.swing.JPanel {
 
         jSeparator2.setOrientation(SwingConstants.VERTICAL);
 
-        jTextField1.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
+        targetIDField.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
 
         searchUserButton.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         searchUserButton.setText("查找用户");
@@ -329,7 +351,7 @@ public class FilePane extends javax.swing.JPanel {
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField1, GroupLayout.PREFERRED_SIZE, 115, GroupLayout.PREFERRED_SIZE)
+                .addComponent(targetIDField, GroupLayout.PREFERRED_SIZE, 115, GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(searchUserButton, GroupLayout.PREFERRED_SIZE, 63, GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -359,7 +381,7 @@ public class FilePane extends javax.swing.JPanel {
                             .addComponent(uploadFileButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
                         .addComponent(jSeparator3)
                         .addGroup(GroupLayout.Alignment.LEADING, fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTextField1)
+                            .addComponent(targetIDField)
                             .addComponent(searchUserButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                             .addComponent(returnButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))))
                 .addGap(15, 15, 15))
@@ -367,12 +389,13 @@ public class FilePane extends javax.swing.JPanel {
 
         fileSplitPane.setBackground(new Color(255, 255, 255));
         fileSplitPane.setDividerLocation(750);
-        fileSplitPane.setContinuousLayout(true);
         fileSplitPane.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         fileSplitPane.setMaximumSize(new Dimension(1366, 768));
+        fileSplitPane.setPreferredSize(new Dimension(701, 646));
 
         jSplitPane2.setDividerLocation(400);
         jSplitPane2.setOrientation(JSplitPane.VERTICAL_SPLIT);
+        jSplitPane2.setContinuousLayout(true);
         jSplitPane2.setMaximumSize(new Dimension(1366, 768));
 
         fileInfoScroll.setBackground(new Color(255, 255, 255));
@@ -421,7 +444,7 @@ public class FilePane extends javax.swing.JPanel {
 
         fileSplitPane.setLeftComponent(jSplitPane2);
 
-        jSplitPane1.setDividerLocation(600);
+        jSplitPane1.setDividerLocation(500);
         jSplitPane1.setOrientation(JSplitPane.VERTICAL_SPLIT);
 
         fileDisplayScroll.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
@@ -468,7 +491,7 @@ public class FilePane extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(fileButtonPane, GroupLayout.PREFERRED_SIZE, 38, GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(fileSplitPane, GroupLayout.DEFAULT_SIZE, 757, Short.MAX_VALUE)
+                .addComponent(fileSplitPane, GroupLayout.PREFERRED_SIZE, 646, GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
     }
@@ -858,6 +881,35 @@ public class FilePane extends javax.swing.JPanel {
     }//GEN-LAST:event_addNoteButtonMouseExited
 
     private void addNoteButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_addNoteButtonActionPerformed
+        String content=noteInputArea.getText();
+        if (content.equals(""))
+            return;
+        try {
+            String fileID=getSelectedFile().getFileID();
+            String creator=m_Business.getUser().getUserID();
+            Note note=new Note(content,fileID,creator);
+            AddNoteResult result = m_Business.addNote(note);
+            switch (result) {
+                case OK:
+                    JOptionPane.showMessageDialog(this, "添加备注成功", null, JOptionPane.INFORMATION_MESSAGE);
+                    refreshNoteAndText();
+                    break;
+                case unAuthorized:
+                    JOptionPane.showMessageDialog(this, "您未登录，请重新登录", null, JOptionPane.WARNING_MESSAGE);
+                    m_MainFrame.setVisible(false);
+                    LoginDialog loginDialog=new LoginDialog(m_MainFrame,m_Business);
+                    break;
+                case wrong:
+                    JOptionPane.showMessageDialog(this, "文件不存在", null, JOptionPane.WARNING_MESSAGE);
+                    getDirectory(currentID);
+                    break;
+                default:
+                    JOptionPane.showMessageDialog(this, "未知错误", null, JOptionPane.ERROR_MESSAGE);
+                    break;
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "网络错误", null, JOptionPane.ERROR_MESSAGE);
+        }
         
     }//GEN-LAST:event_addNoteButtonActionPerformed
 
@@ -879,7 +931,7 @@ public class FilePane extends javax.swing.JPanel {
             DeleteNoteResult result = m_Business.deleteNote(selectedNote);
             switch (result) {
                 case OK:
-                    JOptionPane.showMessageDialog(this, "删除成功", null, JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "删除备注成功", null, JOptionPane.INFORMATION_MESSAGE);
                     refreshNoteAndText();
                     break;
                 case unAuthorized:
@@ -909,7 +961,11 @@ public class FilePane extends javax.swing.JPanel {
     }//GEN-LAST:event_searchUserButtonMouseExited
 
     private void searchUserButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_searchUserButtonActionPerformed
-        // TODO add your handling code here:
+        String targetID=targetIDField.getText();
+        if (!targetID.equals("")){  //输入不为空白
+            getDirectory(targetID);
+            clearNoteAndText();
+        }
     }//GEN-LAST:event_searchUserButtonActionPerformed
 
     private void returnButtonMouseEntered(MouseEvent evt) {//GEN-FIRST:event_returnButtonMouseEntered
@@ -921,7 +977,10 @@ public class FilePane extends javax.swing.JPanel {
     }//GEN-LAST:event_returnButtonMouseExited
 
     private void returnButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_returnButtonActionPerformed
-        // TODO add your handling code here:
+        //currentID=m_Business.getUser().getUserID();
+        String targetID=m_Business.getUser().getUserID();
+        getDirectory(targetID);
+        clearNoteAndText();
     }//GEN-LAST:event_returnButtonActionPerformed
 
     private void refreshButtonMouseEntered(MouseEvent evt) {//GEN-FIRST:event_refreshButtonMouseEntered
@@ -933,8 +992,10 @@ public class FilePane extends javax.swing.JPanel {
     }//GEN-LAST:event_refreshButtonMouseExited
 
     private void refreshButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
-        // TODO add your handling code here:
+        getDirectory(currentID);
+        clearNoteAndText();
     }//GEN-LAST:event_refreshButtonActionPerformed
+    
     
     private void noteSelectedChanged(ListSelectionEvent evt){
         if (!evt.getValueIsAdjusting()){
@@ -962,17 +1023,23 @@ public class FilePane extends javax.swing.JPanel {
                     renameFileButton.setEnabled(false);
                     authorizationButton.setEnabled(false);
                     downloadFileButton.setEnabled(false);
+                    deleteNoteButton.setEnabled(false);
+                    addNoteButton.setEnabled(false);
+                    deleteNoteButton.setEnabled(false);
                 }
                 else{
                     deleteFileButton.setEnabled(true);
                     renameFileButton.setEnabled(true);
                     authorizationButton.setEnabled(true);
                     downloadFileButton.setEnabled(true);
+                    addNoteButton.setEnabled(true);
                 }
             }
             else{                   //他人界面下
                 if (rowIndex==-1){  //无文件选中
                     downloadFileButton.setEnabled(false);
+                    addNoteButton.setEnabled(false);
+                    deleteNoteButton.setEnabled(false);
                 }
                 else{
                     downloadFileButton.setEnabled(true);
@@ -1013,6 +1080,7 @@ public class FilePane extends javax.swing.JPanel {
                 Collections.sort(directory);
                 fileTableModel.setDirectory(directory);
                 fileInfoTable.setModel(fileTableModel);
+                setCurrentID(targetID);
                 //fileInfoTable.repaint();
                 repaint();
                 break;
@@ -1038,6 +1106,7 @@ public class FilePane extends javax.swing.JPanel {
     private void clearNoteAndText(){
         noteTableModel.setNoteList(new ArrayList<Note>());
         noteTable.setModel(noteTableModel);
+        noteTable.clearSelection();
         noteTable.repaint();
         fileContentArea.setText("");
         fileContentArea.repaint();
@@ -1065,6 +1134,7 @@ public class FilePane extends javax.swing.JPanel {
                                 Collections.sort(noteList);
                                 noteTableModel.setNoteList(noteList);
                                 noteTable.setModel(noteTableModel);
+                                noteTable.clearSelection();
 //                                Dimension dimension=noteTable.getSize();
 //                                dimension.height=noteList.size()*20;
 //                                noteTable.setSize(dimension);
@@ -1127,7 +1197,6 @@ public class FilePane extends javax.swing.JPanel {
     JSeparator jSeparator3;
     JSplitPane jSplitPane1;
     JSplitPane jSplitPane2;
-    JTextField jTextField1;
     JScrollPane noteDisplayScroll;
     JTextArea noteInputArea;
     JScrollPane noteInputScroll;
@@ -1136,6 +1205,7 @@ public class FilePane extends javax.swing.JPanel {
     JButton renameFileButton;
     JButton returnButton;
     JButton searchUserButton;
+    JTextField targetIDField;
     JButton uploadFileButton;
     // End of variables declaration//GEN-END:variables
 }
