@@ -29,16 +29,19 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
                       <EmptySpace min="-2" pref="19" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="filePathLabel" min="-2" max="-2" attributes="0"/>
-                          <Component id="filenameLabel" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="pathField" pref="213" max="32767" attributes="0"/>
-                          <Component id="filenameField" max="32767" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="filenameLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="filenameField" min="-2" pref="213" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="filePathLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
+                              <Component id="pathField" min="-2" pref="213" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="pathButton" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
@@ -46,7 +49,7 @@
                       <Component id="confirmButton" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace pref="28" max="32767" attributes="0"/>
+              <EmptySpace pref="19" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -55,14 +58,14 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="pathField" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="filenameLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="filenameField" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="filenameField" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="filePathLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="pathButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="pathField" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Component id="confirmButton" min="-2" max="-2" attributes="0"/>
@@ -85,6 +88,9 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="&#x5fae;&#x8f6f;&#x96c5;&#x9ed1;" size="14" style="0"/>
         </Property>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="m_CloudFile.getFilename()" type="code"/>
+        </Property>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="filePathLabel">
@@ -99,9 +105,6 @@
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="&#x5fae;&#x8f6f;&#x96c5;&#x9ed1;" size="14" style="0"/>
-        </Property>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="m_CloudFile.getFilename()" type="code"/>
         </Property>
       </Properties>
     </Component>

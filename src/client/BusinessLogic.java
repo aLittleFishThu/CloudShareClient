@@ -114,8 +114,7 @@ public class BusinessLogic implements IBusinessLogic{
      * @return 登录结果
      */
     public LoginResult login(Credential cred) throws ClientProtocolException, IOException {
-            NetworkLayer network=new NetworkLayer();
-            LoginResult loginResult=network.login(cred);
+            LoginResult loginResult=m_Network.login(cred);
             if (loginResult.equals(LoginResult.OK))
                     m_User=new User(cred.getUserID(),cred.getPassword());
               /*  currentUser=new User(cred.getUserID(),cred.getPassword());
@@ -278,7 +277,7 @@ public class BusinessLogic implements IBusinessLogic{
     @Override
     public AuthorizationResult setAuthorization(CloudFile file,
             Authorization authorization) throws IOException {
-       if (!file.getCreator().equals(m_User))             //检查权限
+       if (!file.getCreator().equals(m_User.getUserID())) //检查权限
            return AuthorizationResult.wrong;
        if (file.getAuthorization().equals(authorization))
            return AuthorizationResult.OK;                 //与原来的权限相同则不修改

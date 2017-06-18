@@ -7,17 +7,13 @@ package client.ui;
 
 import client.IBusinessLogic;
 import common.CloudFile;
-import common.DownloadFileResult;
-import common.DownloadFileResult.DownloadFileStatus;
-
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -34,19 +30,17 @@ import javax.swing.WindowConstants;
  * @author yzj
  */
 public class DownloadFileWindow extends javax.swing.JDialog {
-    private final JFrame m_MainFrame;
-    private final IBusinessLogic m_Business;
     private final CloudFile m_CloudFile;
+    private final byte[] content;
     /**
      * Creates new form uploadFileWindow
      * @param mainFrame
      * @param business
      */
-    public DownloadFileWindow(JFrame mainFrame,IBusinessLogic business,CloudFile cloudFile) {
+    public DownloadFileWindow(JFrame mainFrame,CloudFile cloudFile,byte[] content) {
         super(mainFrame, true);
-        m_MainFrame=mainFrame;
-        m_Business=business;
         m_CloudFile=cloudFile;
+        this.content=content;
         initComponents();
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -78,12 +72,12 @@ public class DownloadFileWindow extends javax.swing.JDialog {
         filenameLabel.setText("文件名");
 
         filenameField.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        filenameField.setText(m_CloudFile.getFilename());
 
         filePathLabel.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
         filePathLabel.setText("下载到");
 
         pathField.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
-        pathField.setText(m_CloudFile.getFilename());
 
         pathButton.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
         pathButton.setText("浏览");
@@ -100,31 +94,33 @@ public class DownloadFileWindow extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(19, 19, 19)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                            .addComponent(filePathLabel)
-                            .addComponent(filenameLabel))
-                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                            .addComponent(pathField, GroupLayout.DEFAULT_SIZE, 213, Short.MAX_VALUE)
-                            .addComponent(filenameField))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(filenameLabel)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(filenameField, GroupLayout.PREFERRED_SIZE, 213, GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(filePathLabel)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(pathField, GroupLayout.PREFERRED_SIZE, 213, GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(pathButton))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(153, 153, 153)
                         .addComponent(confirmButton)))
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(pathField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                    .addComponent(filenameLabel))
+                    .addComponent(filenameLabel)
+                    .addComponent(filenameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(filenameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addComponent(filePathLabel)
-                    .addComponent(pathButton))
+                    .addComponent(pathButton)
+                    .addComponent(pathField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(confirmButton)
                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -150,41 +146,39 @@ public class DownloadFileWindow extends javax.swing.JDialog {
     private void confirmButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_confirmButtonActionPerformed
         String filePath=pathField.getText();
         String filename=filenameField.getText();
-        DownloadFileResult result;
-        try {
-            result = m_Business.downloadFile(m_CloudFile);
-            byte[] content=result.getContent();
-            DownloadFileStatus status=result.getResult();
-            switch(status){
-            case OK:
-                File file=new File(filePath+"\\"+filename);
-                if (file.exists()){
-                    int confirm=JOptionPane.showConfirmDialog(this, "检测到同名文件，是否覆盖？", "警告", JOptionPane.OK_CANCEL_OPTION);
-                    if (confirm==JOptionPane.CANCEL_OPTION){
-                        return;
-                    }
-                }
-                FileOutputStream fos=new FileOutputStream(file);
-                fos.write(content);
-                fos.close();
-            case unAuthorized:
-                JOptionPane.showMessageDialog
-                (this,"您未登录，请重新登录",null,JOptionPane.WARNING_MESSAGE);
-                break;
-            case wrong:
-                JOptionPane.showMessageDialog
-                (this,"文件不存在，请重新选择",null,JOptionPane.WARNING_MESSAGE);
-                break;
-            default:
-                JOptionPane.showMessageDialog
-                (this,"未知错误",null,JOptionPane.ERROR_MESSAGE);
-                break;
-            
-            }
-        }  catch (IOException e) {
+        if (filename.equals("")){
             JOptionPane.showMessageDialog
-            (this,"网络错误",null,JOptionPane.ERROR_MESSAGE);
-        } 
+                (this,"请输入文件名",null,JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (filePath.equals("")){
+            JOptionPane.showMessageDialog
+                (this,"请选择下载路径",null,JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        File file=new File(filePath+"\\"+filename);
+        if (file.exists()){
+            int confirm=JOptionPane.showConfirmDialog(this, "检测到同名文件，是否覆盖？", "警告", JOptionPane.OK_CANCEL_OPTION);
+            if (confirm==JOptionPane.CANCEL_OPTION){
+                return;
+            }
+        }
+                
+        FileOutputStream fos;
+        try {
+            fos = new FileOutputStream(file);
+            fos.write(content);
+            fos.close();
+            JOptionPane.showMessageDialog
+            (this,"下载完成",null,JOptionPane.INFORMATION_MESSAGE);
+            this.dispose();
+        } catch (FileNotFoundException e) {
+            JOptionPane.showMessageDialog
+            (this,"请输入正确的路径",null,JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog
+            (this,"IO异常",null,JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_confirmButtonActionPerformed
 
     private void pathButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_pathButtonActionPerformed
@@ -192,7 +186,9 @@ public class DownloadFileWindow extends javax.swing.JDialog {
         fileWindow.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int confirm = fileWindow.showOpenDialog(null);
         if (confirm == JFileChooser.APPROVE_OPTION) {
-                String filePath = fileWindow.getCurrentDirectory().getPath();
+                String parentPath = fileWindow.getSelectedFile().getAbsolutePath();
+                String directoryName=fileWindow.getSelectedFile().getName();
+                String filePath=parentPath+"\\"+directoryName;
                 pathField.setText(filePath);
         }
     }//GEN-LAST:event_pathButtonActionPerformed

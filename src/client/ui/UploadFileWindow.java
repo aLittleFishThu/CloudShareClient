@@ -31,16 +31,14 @@ import org.apache.http.client.ClientProtocolException;
  * @author yzj
  */
 public class UploadFileWindow extends javax.swing.JDialog {
-    private final JFrame m_MainFrame;
-    private final IBusinessLogic m_Business;
-
+    private boolean confirmFlag;
+    
     /**
      * Creates new form uploadFileWindow
      */
-    public UploadFileWindow(JFrame mainFrame,IBusinessLogic business) {
+    public UploadFileWindow(JFrame mainFrame) {
         super(mainFrame, true);
-        m_MainFrame=mainFrame;
-        m_Business=business;
+        confirmFlag=false;
         initComponents();
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -153,37 +151,20 @@ public class UploadFileWindow extends javax.swing.JDialog {
     private void confirmButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_confirmButtonActionPerformed
         String filePath=pathField.getText();
         String filename=filenameField.getText();
-        UploadFileResult result;
-        try {
-            result = m_Business.uploadFile(filename, filePath);
-            switch(result){
-            case OK:
-                JOptionPane.showMessageDialog
-                (this,"上传成功",null,JOptionPane.INFORMATION_MESSAGE);
-                this.dispose();
-                break;
-            case tooLarge:
-                JOptionPane.showMessageDialog
-                (this,"文件过大，请重新选择",null,JOptionPane.WARNING_MESSAGE);
-                break;
-            case unAuthorized:
-                JOptionPane.showMessageDialog
-                (this,"您未登录，请重新登录",null,JOptionPane.WARNING_MESSAGE);
-                break;
-            case wrong:
-                JOptionPane.showMessageDialog
-                (this,"文件不存在，请重新选择",null,JOptionPane.WARNING_MESSAGE);
-                break;
-            default:
-                JOptionPane.showMessageDialog
-                (this,"未知错误",null,JOptionPane.ERROR_MESSAGE);
-                break;
-            
-            }
-        }  catch (IOException e) {
+        
+        if (filename.equals("")){
             JOptionPane.showMessageDialog
-            (this,"网络错误",null,JOptionPane.ERROR_MESSAGE);
-        } 
+                (this,"请输入文件名",null,JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (filePath.equals("")){
+            JOptionPane.showMessageDialog
+                (this,"请选择文件",null,JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        confirmFlag=true;
+        this.setVisible(false);
+        
     }//GEN-LAST:event_confirmButtonActionPerformed
 
     private void pathButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_pathButtonActionPerformed
@@ -193,11 +174,22 @@ public class UploadFileWindow extends javax.swing.JDialog {
                 String filePath = fileWindow.getSelectedFile().getPath();
                 String filename = fileWindow.getSelectedFile().getName();
                 pathField.setText(filePath);
-                filenameField.setText(filename);  
+                filenameField.setText(filename); 
         }
     }//GEN-LAST:event_pathButtonActionPerformed
 
-
+    public String getFilePath(){
+        return pathField.getText();
+    }
+    
+    public String getFileName(){
+        return filenameField.getText();
+    }
+    
+    public boolean isConfirmed(){
+        return confirmFlag;
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     JButton confirmButton;
     JLabel filePathLabel;
