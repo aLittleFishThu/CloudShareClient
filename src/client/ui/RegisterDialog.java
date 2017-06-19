@@ -202,33 +202,33 @@ public class RegisterDialog extends javax.swing.JDialog {
             switch(result){
                 case OK:
                     JOptionPane.showMessageDialog
-                    (this,"注册成功！",null,JOptionPane.INFORMATION_MESSAGE);
+                    (this,"注册成功！","注册",JOptionPane.INFORMATION_MESSAGE);
                     this.dispose();
                     break;
                 case illegalID:
                     JOptionPane.showMessageDialog
-                    (this,"请输入合法的用户名！",null,JOptionPane.WARNING_MESSAGE);
+                    (this,"请输入合法的用户名！","注册",JOptionPane.WARNING_MESSAGE);
                     break;
                 case illegalPassword:
                     JOptionPane.showMessageDialog
-                    (this,"请输入合法的密码！",null,JOptionPane.WARNING_MESSAGE);
+                    (this,"请输入合法的密码！","注册",JOptionPane.WARNING_MESSAGE);
                     break;
                 case notMatch:
                     JOptionPane.showMessageDialog
-                    (this,"请确认两次输入的密码是否一致！",null,JOptionPane.WARNING_MESSAGE);
+                    (this,"请确认两次输入的密码是否一致！","注册",JOptionPane.WARNING_MESSAGE);
                     break;
                 case usedID:
                     JOptionPane.showMessageDialog
-                    (this,"该用户名已被使用！",null,JOptionPane.WARNING_MESSAGE);
+                    (this,"该用户名已被使用！","注册",JOptionPane.WARNING_MESSAGE);
                     break;
                 default:
                     JOptionPane.showMessageDialog
-                    (this,"未知错误",null,JOptionPane.ERROR_MESSAGE);
+                    (this,"未知错误","注册",JOptionPane.ERROR_MESSAGE);
                     break;
             }
         }  catch (IOException e1) {
             JOptionPane.showMessageDialog
-            (this, "网络错误",null,JOptionPane.ERROR_MESSAGE);
+            (this, "网络错误","注册",JOptionPane.ERROR_MESSAGE);
         } 
     }//GEN-LAST:event_registerConfirm
 

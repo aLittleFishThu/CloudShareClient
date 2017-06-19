@@ -195,16 +195,16 @@ public class LoginDialog extends javax.swing.JDialog {
                     break;
                 case wrong:
                     JOptionPane.showMessageDialog
-                    (this,"登录失败，请检查用户名及密码",null,JOptionPane.WARNING_MESSAGE);
+                    (this,"登录失败，请检查用户名及密码","登录",JOptionPane.WARNING_MESSAGE);
                     break;
                 default:
                     JOptionPane.showMessageDialog
-                    (this,"未知错误",null,JOptionPane.ERROR_MESSAGE);
+                    (this,"未知错误","登录",JOptionPane.ERROR_MESSAGE);
                     break;
             }
         }  catch (IOException e1) {
             JOptionPane.showMessageDialog
-            (this, "网络错误",null,JOptionPane.ERROR_MESSAGE);
+            (this, "网络错误","登录",JOptionPane.ERROR_MESSAGE);
         } 
     }//GEN-LAST:event_loginAction
 

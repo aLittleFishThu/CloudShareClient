@@ -9,6 +9,7 @@ import client.IBusinessLogic;
 import common.AddNoteResult;
 import common.Authorization;
 import common.AuthorizationResult;
+import common.ChangePasswdResult;
 import common.CloudFile;
 import common.DeleteFileResult;
 import common.DeleteNoteResult;
@@ -16,12 +17,15 @@ import common.DownloadFileResult;
 import common.DownloadFileResult.DownloadFileStatus;
 import common.FileDirectoryResult;
 import common.FileDirectoryResult.FileDirectoryStatus;
+import static common.LoginResult.OK;
+import static common.LoginResult.wrong;
 import common.Note;
 import common.NoteListResult;
 import common.NoteListResult.NoteListStatus;
 import common.RenameFileResult;
 
 import common.UploadFileResult;
+import static common.UploadFileResult.tooLarge;
 import static common.UploadFileResult.unAuthorized;
 
 import java.awt.Color;
@@ -173,6 +177,8 @@ public class FilePane extends javax.swing.JPanel {
         returnButton = new JButton();
         jSeparator3 = new JSeparator();
         refreshButton = new JButton();
+        jSeparator4 = new JSeparator();
+        changePasswdButton = new JButton();
         fileSplitPane = new JSplitPane();
         jSplitPane2 = new JSplitPane();
         fileInfoScroll = new JScrollPane();
@@ -327,6 +333,21 @@ public class FilePane extends javax.swing.JPanel {
         refreshButton.addMouseListener(formListener);
         refreshButton.addActionListener(formListener);
 
+        jSeparator4.setOrientation(SwingConstants.VERTICAL);
+
+        changePasswdButton.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
+        changePasswdButton.setText("修改密码");
+        changePasswdButton.setActionCommand("JButton1");
+        changePasswdButton.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        changePasswdButton.setBorderPainted(false);
+        changePasswdButton.setContentAreaFilled(false);
+        changePasswdButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        changePasswdButton.setFocusPainted(false);
+        changePasswdButton.setMaximumSize(new Dimension(30, 20));
+        changePasswdButton.setMinimumSize(new Dimension(30, 20));
+        changePasswdButton.addMouseListener(formListener);
+        changePasswdButton.addActionListener(formListener);
+
         GroupLayout fileButtonPaneLayout = new GroupLayout(fileButtonPane);
         fileButtonPane.setLayout(fileButtonPaneLayout);
         fileButtonPaneLayout.setHorizontalGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -358,30 +379,40 @@ public class FilePane extends javax.swing.JPanel {
                 .addComponent(jSeparator3, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(refreshButton, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator4, GroupLayout.PREFERRED_SIZE, 2, GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(changePasswdButton, GroupLayout.PREFERRED_SIZE, 63, GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(18, Short.MAX_VALUE))
         );
         fileButtonPaneLayout.setVerticalGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(GroupLayout.Alignment.TRAILING, fileButtonPaneLayout.createSequentialGroup()
-                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(refreshButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                    .addGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jSeparator2)
-                        .addGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(addNoteButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(deleteNoteButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
-                        .addComponent(jSeparator1)
-                        .addGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(downloadFileButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(deleteFileButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(renameFileButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(authorizationButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(uploadFileButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
-                        .addComponent(jSeparator3)
-                        .addGroup(GroupLayout.Alignment.LEADING, fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(targetIDField)
-                            .addComponent(searchUserButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(returnButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap()
+                .addGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                    .addComponent(jSeparator4)
+                    .addGroup(fileButtonPaneLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                            .addComponent(changePasswdButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                            .addGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addComponent(refreshButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                .addGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(jSeparator2)
+                                    .addGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(addNoteButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(deleteNoteButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jSeparator1)
+                                    .addGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(downloadFileButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(deleteFileButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(renameFileButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(authorizationButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(uploadFileButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jSeparator3)
+                                    .addGroup(GroupLayout.Alignment.LEADING, fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(targetIDField)
+                                        .addComponent(searchUserButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(returnButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)))))))
                 .addGap(15, 15, 15))
         );
 
@@ -534,6 +565,9 @@ public class FilePane extends javax.swing.JPanel {
             else if (evt.getSource() == refreshButton) {
                 FilePane.this.refreshButtonActionPerformed(evt);
             }
+            else if (evt.getSource() == changePasswdButton) {
+                FilePane.this.changePasswdButtonActionPerformed(evt);
+            }
         }
 
         public void mouseClicked(MouseEvent evt) {
@@ -582,6 +616,9 @@ public class FilePane extends javax.swing.JPanel {
             else if (evt.getSource() == refreshButton) {
                 FilePane.this.refreshButtonMouseEntered(evt);
             }
+            else if (evt.getSource() == changePasswdButton) {
+                FilePane.this.changePasswdButtonMouseEntered(evt);
+            }
         }
 
         public void mouseExited(MouseEvent evt) {
@@ -614,6 +651,9 @@ public class FilePane extends javax.swing.JPanel {
             }
             else if (evt.getSource() == refreshButton) {
                 FilePane.this.refreshButtonMouseExited(evt);
+            }
+            else if (evt.getSource() == changePasswdButton) {
+                FilePane.this.changePasswdButtonMouseExited(evt);
             }
         }
 
@@ -1023,6 +1063,18 @@ public class FilePane extends javax.swing.JPanel {
             noteTable.repaint();
         }
     }//GEN-LAST:event_noteDisplayScrollMouseClicked
+
+    private void changePasswdButtonMouseEntered(MouseEvent evt) {//GEN-FIRST:event_changePasswdButtonMouseEntered
+        changePasswdButton.setContentAreaFilled(true);
+    }//GEN-LAST:event_changePasswdButtonMouseEntered
+
+    private void changePasswdButtonMouseExited(MouseEvent evt) {//GEN-FIRST:event_changePasswdButtonMouseExited
+        changePasswdButton.setContentAreaFilled(false);
+    }//GEN-LAST:event_changePasswdButtonMouseExited
+
+    private void changePasswdButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_changePasswdButtonActionPerformed
+        ChangePasswdWindow changePasswdWindow = new ChangePasswdWindow(m_MainFrame,m_Business);
+    }//GEN-LAST:event_changePasswdButtonActionPerformed
     
     
     private void noteSelectedChanged(ListSelectionEvent evt){
@@ -1075,6 +1127,7 @@ public class FilePane extends javax.swing.JPanel {
                 }
                 else{
                     downloadFileButton.setEnabled(true);
+                    addNoteButton.setEnabled(true);
                 }
             }
         }
@@ -1225,6 +1278,7 @@ public class FilePane extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     JButton addNoteButton;
     JButton authorizationButton;
+    JButton changePasswdButton;
     JButton deleteFileButton;
     JButton deleteNoteButton;
     JButton downloadFileButton;
@@ -1237,6 +1291,7 @@ public class FilePane extends javax.swing.JPanel {
     JSeparator jSeparator1;
     JSeparator jSeparator2;
     JSeparator jSeparator3;
+    JSeparator jSeparator4;
     JSplitPane jSplitPane1;
     JSplitPane jSplitPane2;
     JScrollPane noteDisplayScroll;
