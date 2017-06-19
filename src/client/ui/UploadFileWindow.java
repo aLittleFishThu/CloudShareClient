@@ -40,6 +40,7 @@ public class UploadFileWindow extends javax.swing.JDialog {
         super(mainFrame, true);
         confirmFlag=false;
         initComponents();
+        this.setTitle("上传文件");
         this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
@@ -67,21 +68,21 @@ public class UploadFileWindow extends javax.swing.JDialog {
         setTitle("上传文件");
         setResizable(false);
 
-        filePathLabel.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        filePathLabel.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         filePathLabel.setText("本地路径");
 
-        pathField.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        pathField.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
 
-        pathButton.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        pathButton.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         pathButton.setText("浏览");
         pathButton.addActionListener(formListener);
 
-        filenameLabel.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        filenameLabel.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         filenameLabel.setText("文件名");
 
-        filenameField.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        filenameField.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
 
-        confirmButton.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        confirmButton.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         confirmButton.setText("确定");
         confirmButton.addActionListener(formListener);
 
@@ -111,7 +112,7 @@ public class UploadFileWindow extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(167, 167, 167)
                         .addComponent(confirmButton)))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
@@ -126,7 +127,7 @@ public class UploadFileWindow extends javax.swing.JDialog {
                     .addComponent(filenameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(filenameTip)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
                 .addComponent(confirmButton)
                 .addContainerGap())
         );
@@ -154,12 +155,12 @@ public class UploadFileWindow extends javax.swing.JDialog {
         
         if (filename.equals("")){
             JOptionPane.showMessageDialog
-                (this,"请输入文件名",null,JOptionPane.WARNING_MESSAGE);
+                (this,"请输入文件名","上传文件",JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (filePath.equals("")){
             JOptionPane.showMessageDialog
-                (this,"请选择文件",null,JOptionPane.WARNING_MESSAGE);
+                (this,"请选择文件","上传文件",JOptionPane.WARNING_MESSAGE);
             return;
         }
         confirmFlag=true;

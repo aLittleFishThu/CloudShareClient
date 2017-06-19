@@ -16,8 +16,6 @@ import common.DownloadFileResult;
 import common.DownloadFileResult.DownloadFileStatus;
 import common.FileDirectoryResult;
 import common.FileDirectoryResult.FileDirectoryStatus;
-import static common.LoginResult.OK;
-import static common.LoginResult.wrong;
 import common.Note;
 import common.NoteListResult;
 import common.NoteListResult.NoteListStatus;
@@ -30,6 +28,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -332,11 +331,10 @@ public class FilePane extends javax.swing.JPanel {
         fileButtonPane.setLayout(fileButtonPaneLayout);
         fileButtonPaneLayout.setHorizontalGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(fileButtonPaneLayout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(uploadFileButton, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(downloadFileButton, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE)
-                .addGap(2, 2, 2)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(deleteFileButton, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(renameFileButton, GroupLayout.PREFERRED_SIZE, 57, GroupLayout.PREFERRED_SIZE)
@@ -360,7 +358,7 @@ public class FilePane extends javax.swing.JPanel {
                 .addComponent(jSeparator3, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(refreshButton, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(47, Short.MAX_VALUE))
+                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         fileButtonPaneLayout.setVerticalGroup(fileButtonPaneLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(GroupLayout.Alignment.TRAILING, fileButtonPaneLayout.createSequentialGroup()
@@ -401,7 +399,9 @@ public class FilePane extends javax.swing.JPanel {
         fileInfoScroll.setBackground(new Color(255, 255, 255));
         fileInfoScroll.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         fileInfoScroll.getViewport().setBackground(Color.WHITE);
+        fileInfoScroll.addMouseListener(formListener);
 
+        fileInfoTable.setAutoCreateRowSorter(true);
         fileInfoTable.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         fileInfoTable.setModel(fileTableModel);
         fileInfoTable.getTableHeader().setFont(new Font("微软雅黑", 0, 12));
@@ -424,9 +424,12 @@ public class FilePane extends javax.swing.JPanel {
         noteDisplayScroll.setBackground(new Color(255, 255, 255));
         noteDisplayScroll.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         noteDisplayScroll.getViewport().setBackground(Color.WHITE);
+        noteDisplayScroll.addMouseListener(formListener);
 
+        noteTable.setAutoCreateRowSorter(true);
         noteTable.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         noteTable.setModel(noteTableModel);
+        noteTable.getTableHeader().setFont(new Font("微软雅黑", 0, 12));
         noteTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         noteTable.setRowHeight(20);
         noteTable.setShowHorizontalLines(false);
@@ -479,19 +482,19 @@ public class FilePane extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(fileButtonPane, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                .addGap(1072, 1072, 1072))
-            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(fileSplitPane, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                    .addComponent(fileSplitPane, GroupLayout.DEFAULT_SIZE, 1346, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(fileButtonPane, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(fileButtonPane, GroupLayout.PREFERRED_SIZE, 38, GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(fileSplitPane, GroupLayout.PREFERRED_SIZE, 646, GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(fileSplitPane, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
     }
@@ -534,8 +537,14 @@ public class FilePane extends javax.swing.JPanel {
         }
 
         public void mouseClicked(MouseEvent evt) {
-            if (evt.getSource() == fileInfoTable) {
+            if (evt.getSource() == fileInfoScroll) {
+                FilePane.this.fileInfoScrollMouseClicked(evt);
+            }
+            else if (evt.getSource() == fileInfoTable) {
                 FilePane.this.fileInfoTableMouseClicked(evt);
+            }
+            else if (evt.getSource() == noteDisplayScroll) {
+                FilePane.this.noteDisplayScrollMouseClicked(evt);
             }
             else if (evt.getSource() == noteTable) {
                 FilePane.this.noteTableMouseClicked(evt);
@@ -618,7 +627,7 @@ public class FilePane extends javax.swing.JPanel {
     private void authorizationButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_authorizationButtonActionPerformed
         CloudFile selectedFile=getSelectedFile();
         if (selectedFile==null){
-            JOptionPane.showMessageDialog(this, "请选择文件", null, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "请选择文件", "修改权限", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -633,16 +642,16 @@ public class FilePane extends javax.swing.JPanel {
             AuthorizationResult result = m_Business.setAuthorization(selectedFile, authorization);
             switch (result) {
                 case OK:
-                    JOptionPane.showMessageDialog(m_MainFrame, "修改成功", null, JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(m_MainFrame, "修改成功", "修改权限", JOptionPane.INFORMATION_MESSAGE);
                     getDirectory(currentID);
                 break;
                     case unAuthorized:
-                    JOptionPane.showMessageDialog(m_MainFrame, "您未登录，请重新登录", null, JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(m_MainFrame, "您未登录，请重新登录", "修改权限", JOptionPane.WARNING_MESSAGE);
                     m_MainFrame.setVisible(false);
                     LoginDialog loginDialog=new LoginDialog(m_MainFrame,m_Business);
                     break;
                 case wrong:
-                    JOptionPane.showMessageDialog(m_MainFrame, "文件不存在，请重新选择", null, JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(m_MainFrame, "文件不存在，请重新选择", "修改权限", JOptionPane.WARNING_MESSAGE);
                     getDirectory(currentID);
                     break;
                 default:
@@ -650,14 +659,14 @@ public class FilePane extends javax.swing.JPanel {
                 break;
             }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(m_MainFrame, "网络错误", null, JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(m_MainFrame, "网络错误", "修改权限", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_authorizationButtonActionPerformed
 
     private void renameFileButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_renameFileButtonActionPerformed
         CloudFile selectedFile=getSelectedFile();
         if (selectedFile==null){
-            JOptionPane.showMessageDialog(this, "请选择文件", null, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "请选择文件", "重命名", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -668,7 +677,7 @@ public class FilePane extends javax.swing.JPanel {
         }
 
         if (newFilename.equals("")){
-            JOptionPane.showMessageDialog(this, "请输入正确的文件名", null, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "请输入正确的文件名", "重命名", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -676,58 +685,58 @@ public class FilePane extends javax.swing.JPanel {
             RenameFileResult result = m_Business.renameFile(selectedFile,newFilename);
             switch (result) {
                 case OK:
-                    JOptionPane.showMessageDialog(this, "重命名成功", null, JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "重命名成功", "重命名", JOptionPane.INFORMATION_MESSAGE);
                     getDirectory(currentID);
                     break;
                 case unAuthorized:
-                    JOptionPane.showMessageDialog(this, "您未登录，请重新登录", null, JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "您未登录，请重新登录", "重命名", JOptionPane.WARNING_MESSAGE);
                     m_MainFrame.setVisible(false);
                     LoginDialog loginDialog=new LoginDialog(m_MainFrame,m_Business);
                     break;
                 case wrong:
-                    JOptionPane.showMessageDialog(this, "文件不存在，请重新选择", null, JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "文件不存在，请重新选择", "重命名", JOptionPane.WARNING_MESSAGE);
                     getDirectory(currentID);
                     break;
                 case repeatedName:
-                    JOptionPane.showMessageDialog(this, "与已有文件重名", null, JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "与已有文件重名", "重命名", JOptionPane.WARNING_MESSAGE);
                     break;
                 default:
-                    JOptionPane.showMessageDialog(m_MainFrame, "未知错误", null, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(m_MainFrame, "未知错误", "重命名", JOptionPane.ERROR_MESSAGE);
                     break;
             }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(m_MainFrame, "网络错误", null, JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(m_MainFrame, "网络错误", "重命名", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_renameFileButtonActionPerformed
 
     private void deleteFileButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_deleteFileButtonActionPerformed
         CloudFile selectedFile=getSelectedFile();
         if (selectedFile==null){
-            JOptionPane.showMessageDialog(this, "请选择文件", null, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "请选择文件", "删除文件", JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
             DeleteFileResult result = m_Business.deleteFile(selectedFile);
             switch (result) {
                 case OK:
-                    JOptionPane.showMessageDialog(this, "删除成功", null, JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "删除成功",  "删除文件", JOptionPane.INFORMATION_MESSAGE);
                     getDirectory(currentID);
                     break;
                 case unAuthorized:
-                    JOptionPane.showMessageDialog(this, "您未登录，请重新登录", null, JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "您未登录，请重新登录",  "删除文件", JOptionPane.WARNING_MESSAGE);
                     m_MainFrame.setVisible(false);
                     LoginDialog loginDialog=new LoginDialog(m_MainFrame,m_Business);
                     break;
                 case wrong:
-                    JOptionPane.showMessageDialog(this, "文件不存在，请重新选择", null, JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "文件不存在，请重新选择", "删除文件", JOptionPane.WARNING_MESSAGE);
                     getDirectory(currentID);
                     break;
                 default:
-                    JOptionPane.showMessageDialog(this, "未知错误", null, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "未知错误",  "删除文件", JOptionPane.ERROR_MESSAGE);
                     break;
             }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "网络错误", null, JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "网络错误",  "删除文件", JOptionPane.ERROR_MESSAGE);
         }
         //fileInfoTable.clearSelection();
     }//GEN-LAST:event_deleteFileButtonActionPerformed
@@ -735,7 +744,7 @@ public class FilePane extends javax.swing.JPanel {
     private void downloadFileButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_downloadFileButtonActionPerformed
         CloudFile selectedFile=getSelectedFile();
         if (selectedFile==null){
-            JOptionPane.showMessageDialog(m_MainFrame, "请选择文件", null, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(m_MainFrame, "请选择文件", "下载文件", JOptionPane.WARNING_MESSAGE);
             return;
         }
         DownloadFileResult result;
@@ -749,22 +758,22 @@ public class FilePane extends javax.swing.JPanel {
                     break;
                 case unAuthorized:
                     JOptionPane.showMessageDialog
-                    (this,"您未登录，请重新登录",null,JOptionPane.WARNING_MESSAGE);
+                    (this,"您未登录，请重新登录", "下载文件",JOptionPane.WARNING_MESSAGE);
                     m_MainFrame.setVisible(false);
                     LoginDialog loginDialog=new LoginDialog(m_MainFrame,m_Business);
                     break;
                 case wrong:
                     JOptionPane.showMessageDialog
-                    (this,"文件不存在，请重新选择",null,JOptionPane.WARNING_MESSAGE);
+                    (this,"文件不存在，请重新选择", "下载文件",JOptionPane.WARNING_MESSAGE);
                     break;
                 default:
                     JOptionPane.showMessageDialog
-                    (this,"未知错误",null,JOptionPane.ERROR_MESSAGE);
+                    (this,"未知错误", "下载文件",JOptionPane.ERROR_MESSAGE);
                     break;
             }
         }  catch (IOException e) {
             JOptionPane.showMessageDialog
-            (this,"网络错误",null,JOptionPane.ERROR_MESSAGE);
+            (this,"网络错误", "下载文件",JOptionPane.ERROR_MESSAGE);
         }
         //fileInfoTable.clearSelection();
     }//GEN-LAST:event_downloadFileButtonActionPerformed
@@ -785,31 +794,31 @@ public class FilePane extends javax.swing.JPanel {
             switch(result){
                 case OK:
                     JOptionPane.showMessageDialog
-                    (this,"上传成功",null,JOptionPane.INFORMATION_MESSAGE);
+                    (this,"上传成功", "上传文件",JOptionPane.INFORMATION_MESSAGE);
                     break;
                 case tooLarge:
                     JOptionPane.showMessageDialog
-                    (this,"文件过大，请重新选择",null,JOptionPane.WARNING_MESSAGE);
+                    (this,"文件过大，请重新选择","上传文件",JOptionPane.WARNING_MESSAGE);
                     break;
                 case unAuthorized:
                     JOptionPane.showMessageDialog
-                    (this,"您未登录，请重新登录",null,JOptionPane.WARNING_MESSAGE);
+                    (this,"您未登录，请重新登录","上传文件",JOptionPane.WARNING_MESSAGE);
                     m_MainFrame.setVisible(false);
                     LoginDialog loginDialog=new LoginDialog(m_MainFrame,m_Business);
                     break;
                 case wrong:
                     JOptionPane.showMessageDialog
-                    (this,"文件不存在，请重新选择",null,JOptionPane.WARNING_MESSAGE);
+                    (this,"文件不存在，请重新选择","上传文件",JOptionPane.WARNING_MESSAGE);
                     break;
                 default:
                     JOptionPane.showMessageDialog
-                    (this,"未知错误",null,JOptionPane.ERROR_MESSAGE);
+                    (this,"未知错误","上传文件",JOptionPane.ERROR_MESSAGE);
                     break;
 
             }
         }  catch (IOException e) {
             JOptionPane.showMessageDialog
-            (this,"网络错误",null,JOptionPane.ERROR_MESSAGE);
+            (this,"网络错误","上传文件",JOptionPane.ERROR_MESSAGE);
         }
         getDirectory(currentID);
         //fileInfoTable.clearSelection();
@@ -891,24 +900,24 @@ public class FilePane extends javax.swing.JPanel {
             AddNoteResult result = m_Business.addNote(note);
             switch (result) {
                 case OK:
-                    JOptionPane.showMessageDialog(this, "添加备注成功", null, JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "添加备注成功", "添加备注", JOptionPane.INFORMATION_MESSAGE);
                     refreshNoteAndText();
                     break;
                 case unAuthorized:
-                    JOptionPane.showMessageDialog(this, "您未登录，请重新登录", null, JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "您未登录，请重新登录", "添加备注", JOptionPane.WARNING_MESSAGE);
                     m_MainFrame.setVisible(false);
                     LoginDialog loginDialog=new LoginDialog(m_MainFrame,m_Business);
                     break;
                 case wrong:
-                    JOptionPane.showMessageDialog(this, "文件不存在", null, JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "文件不存在", "添加备注", JOptionPane.WARNING_MESSAGE);
                     getDirectory(currentID);
                     break;
                 default:
-                    JOptionPane.showMessageDialog(this, "未知错误", null, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "未知错误", "添加备注", JOptionPane.ERROR_MESSAGE);
                     break;
             }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "网络错误", null, JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "网络错误", "添加备注", JOptionPane.ERROR_MESSAGE);
         }
         
     }//GEN-LAST:event_addNoteButtonActionPerformed
@@ -924,31 +933,31 @@ public class FilePane extends javax.swing.JPanel {
     private void deleteNoteButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_deleteNoteButtonActionPerformed
         Note selectedNote=getSelectedNote();
         if (selectedNote==null){
-            JOptionPane.showMessageDialog(this, "请选择备注", null, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "请选择备注", "删除备注", JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
             DeleteNoteResult result = m_Business.deleteNote(selectedNote);
             switch (result) {
                 case OK:
-                    JOptionPane.showMessageDialog(this, "删除备注成功", null, JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "删除备注成功", "删除备注", JOptionPane.INFORMATION_MESSAGE);
                     refreshNoteAndText();
                     break;
                 case unAuthorized:
-                    JOptionPane.showMessageDialog(this, "您未登录，请重新登录", null, JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "您未登录，请重新登录", "删除备注", JOptionPane.WARNING_MESSAGE);
                     m_MainFrame.setVisible(false);
                     LoginDialog loginDialog=new LoginDialog(m_MainFrame,m_Business);
                     break;
                 case wrong:
-                    JOptionPane.showMessageDialog(this, "文件不存在", null, JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "文件不存在", "删除备注", JOptionPane.WARNING_MESSAGE);
                     getDirectory(currentID);
                     break;
                 default:
-                    JOptionPane.showMessageDialog(this, "未知错误", null, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "未知错误","删除备注", JOptionPane.ERROR_MESSAGE);
                     break;
             }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "网络错误", null, JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "网络错误","删除备注", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_deleteNoteButtonActionPerformed
 
@@ -995,11 +1004,32 @@ public class FilePane extends javax.swing.JPanel {
         getDirectory(currentID);
         clearNoteAndText();
     }//GEN-LAST:event_refreshButtonActionPerformed
+
+    private void fileInfoScrollMouseClicked(MouseEvent evt) {//GEN-FIRST:event_fileInfoScrollMouseClicked
+        Point p=evt.getPoint();
+        if (!fileInfoTable.contains(p)){    //单击表格外的空白区域取消选择或排序
+            fileInfoTable.clearSelection();
+            fileInfoTable.getRowSorter().setSortKeys(null);
+            fileInfoTable.repaint();
+            clearNoteAndText();
+        }
+    }//GEN-LAST:event_fileInfoScrollMouseClicked
+
+    private void noteDisplayScrollMouseClicked(MouseEvent evt) {//GEN-FIRST:event_noteDisplayScrollMouseClicked
+        Point p=evt.getPoint();
+        if (!noteTable.contains(p)){        //单击表格外的空白区域取消选择或排序
+            noteTable.clearSelection();
+            noteTable.getRowSorter().setSortKeys(null);
+            noteTable.repaint();
+        }
+    }//GEN-LAST:event_noteDisplayScrollMouseClicked
     
     
     private void noteSelectedChanged(ListSelectionEvent evt){
         if (!evt.getValueIsAdjusting()){
             int rowIndex=noteTable.getSelectedRow();
+            if (rowIndex!=-1)
+                rowIndex=noteTable.convertRowIndexToModel(rowIndex);
             if (rowIndex==-1){
                 deleteNoteButton.setEnabled(false);
             }
@@ -1017,6 +1047,8 @@ public class FilePane extends javax.swing.JPanel {
         if (!evt.getValueIsAdjusting()){
             String userID=m_Business.getUser().getUserID();
             int rowIndex=fileInfoTable.getSelectedRow();
+            if (rowIndex!=-1)
+                rowIndex=fileInfoTable.convertRowIndexToModel(rowIndex);
             if (this.currentID.equals(userID)){ //自己界面
                 if (rowIndex==-1){  //无文件选中
                     deleteFileButton.setEnabled(false);
@@ -1049,7 +1081,9 @@ public class FilePane extends javax.swing.JPanel {
     }
     
     private CloudFile getSelectedFile(){
-        int rowIndex = fileInfoTable.getSelectedRow();
+        int rowIndex=fileInfoTable.getSelectedRow();
+        if (rowIndex!=-1)
+            rowIndex=fileInfoTable.convertRowIndexToModel(rowIndex);
         CloudFile selectedFile;
         if (rowIndex!=-1)
             selectedFile= fileTableModel.getValueAt(rowIndex);
@@ -1059,8 +1093,10 @@ public class FilePane extends javax.swing.JPanel {
     }
     
     private Note getSelectedNote(){
-        NoteTableModel model = (NoteTableModel) noteTable.getModel();
-        int rowIndex = noteTable.getSelectedRow();
+        //NoteTableModel model = (NoteTableModel) noteTable.getModel();
+        int rowIndex=noteTable.getSelectedRow();
+        if (rowIndex!=-1)
+            rowIndex=noteTable.convertRowIndexToModel(rowIndex);
         Note selectedNote;
         if (rowIndex!=-1)
             selectedNote= noteTableModel.getValueAt(rowIndex);
@@ -1078,32 +1114,37 @@ public class FilePane extends javax.swing.JPanel {
             case OK:
                 ArrayList<CloudFile> directory=result.getFileDirectory();
                 Collections.sort(directory);
+                fileInfoTable.clearSelection();
+                fileInfoTable.getRowSorter().setSortKeys(null);
                 fileTableModel.setDirectory(directory);
                 fileInfoTable.setModel(fileTableModel);
+                fileInfoTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+                fileInfoTable.setEnabled(true);
                 setCurrentID(targetID);
                 //fileInfoTable.repaint();
                 repaint();
                 break;
             case unAuthorized:
-                JOptionPane.showMessageDialog(m_MainFrame, "您未登录，请重新登录", null, JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(m_MainFrame, "您未登录，请重新登录", "加载文件目录", JOptionPane.WARNING_MESSAGE);
                 m_MainFrame.setVisible(false);
                 LoginDialog loginDialog=new LoginDialog(m_MainFrame,m_Business);
                 break;
             case wrong:
-                JOptionPane.showMessageDialog(m_MainFrame, "用户不存在，加载目录失败", null, JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(m_MainFrame, "用户不存在，加载目录失败", "加载文件目录", JOptionPane.WARNING_MESSAGE);
                 break;
             default:
-                JOptionPane.showMessageDialog(m_MainFrame, "未知错误", null, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(m_MainFrame, "未知错误", "加载文件目录", JOptionPane.ERROR_MESSAGE);
                 break;
             }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(m_MainFrame, "网络错误", null, JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(m_MainFrame, "网络错误", "加载文件目录", JOptionPane.ERROR_MESSAGE);
         }
         clearNoteAndText();
         fileInfoTable.clearSelection();
     }
     
     private void clearNoteAndText(){
+        noteTable.getRowSorter().setSortKeys(null);
         noteTableModel.setNoteList(new ArrayList<Note>());
         noteTable.setModel(noteTableModel);
         noteTable.clearSelection();
@@ -1123,6 +1164,13 @@ public class FilePane extends javax.swing.JPanel {
                 NoteListStatus noteStatus=noteListResult.getResult();
                 switch (noteStatus){
                 case OK:
+                    ArrayList<Note> noteList=noteListResult.getNoteList();
+                    Collections.sort(noteList);
+                    noteTable.getRowSorter().setSortKeys(null);
+                    noteTableModel.setNoteList(noteList);
+                    noteTable.setModel(noteTableModel);
+                    noteTable.clearSelection();
+                    noteTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
                       if (selectedFile.getFilename().endsWith(".txt")){
                         DownloadFileResult downloadFileResult=m_Business.downloadFile(selectedFile);
                         DownloadFileStatus fileStatus=downloadFileResult.getResult();
@@ -1130,51 +1178,45 @@ public class FilePane extends javax.swing.JPanel {
                             case OK:
                                 String content=IOUtils.toString(downloadFileResult.getContent(),"gbk");
                                 fileContentArea.setText(content);
-                                ArrayList<Note> noteList=noteListResult.getNoteList();
-                                Collections.sort(noteList);
-                                noteTableModel.setNoteList(noteList);
-                                noteTable.setModel(noteTableModel);
-                                noteTable.clearSelection();
-//                                Dimension dimension=noteTable.getSize();
-//                                dimension.height=noteList.size()*20;
-//                                noteTable.setSize(dimension);
-                                noteTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-                                repaint();
+                                noteTable.repaint();
+                                fileContentArea.repaint();
                                 break;
                             case unAuthorized:
-                                JOptionPane.showMessageDialog(m_MainFrame, "您未登录，请重新登录", null, JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(m_MainFrame, "您未登录，请重新登录", "预览文件", JOptionPane.WARNING_MESSAGE);
                                 m_MainFrame.setVisible(false);
                                 LoginDialog loginDialog=new LoginDialog(m_MainFrame,m_Business);
                                 break;
                             case wrong:
-                                JOptionPane.showMessageDialog(m_MainFrame, "文件不存在", null, JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(m_MainFrame, "文件不存在", "预览文件", JOptionPane.WARNING_MESSAGE);
                                 getDirectory(currentID);
                                 break;
                             default:
-                                JOptionPane.showMessageDialog(m_MainFrame, "未知错误", null, JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(m_MainFrame, "未知错误", "预览文件", JOptionPane.ERROR_MESSAGE);
                                 break;
                         }
                     }
                     else{
                         fileContentArea.setText("");
+                        noteTable.repaint();
+                        fileContentArea.repaint();
                     }
                     break;
                 case unAuthorized:
-                    JOptionPane.showMessageDialog(m_MainFrame, "您未登录，请重新登录", null, JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(m_MainFrame, "您未登录，请重新登录", "加载备注", JOptionPane.WARNING_MESSAGE);
                     m_MainFrame.setVisible(false);
                     LoginDialog loginDialog=new LoginDialog(m_MainFrame,m_Business);
                     break;
                 case wrong:
-                    JOptionPane.showMessageDialog(m_MainFrame, "文件不存在", null, JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(m_MainFrame, "文件不存在", "加载备注", JOptionPane.WARNING_MESSAGE);
                     getDirectory(currentID);
                     break;
                 default:
-                    JOptionPane.showMessageDialog(m_MainFrame, "未知错误", null, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(m_MainFrame, "未知错误", "加载备注", JOptionPane.ERROR_MESSAGE);
                     break;
                 }
    
             } catch(IOException e){
-                JOptionPane.showMessageDialog(m_MainFrame, "网络错误", null, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(m_MainFrame, "网络错误", "加载备注", JOptionPane.ERROR_MESSAGE);
                 clearNoteAndText();
             }
         }

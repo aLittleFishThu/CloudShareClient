@@ -32,6 +32,7 @@ public class AuthorizationWindow extends javax.swing.JDialog {
         super(mainFrame, true);
         confirmFlag=false;
         initComponents();
+        this.setTitle("修改权限");
         this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
@@ -55,13 +56,13 @@ public class AuthorizationWindow extends javax.swing.JDialog {
         setTitle("修改权限");
         setResizable(false);
 
-        tipLabel.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        tipLabel.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         tipLabel.setText("权限");
 
-        statusComboBox.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        statusComboBox.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         statusComboBox.setModel(new DefaultComboBoxModel<>(new String[] { "公开", "仅对自己可见" }));
 
-        confirmButton.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        confirmButton.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         confirmButton.setText("确定");
         confirmButton.addActionListener(formListener);
 
@@ -78,7 +79,7 @@ public class AuthorizationWindow extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(113, 113, 113)
                         .addComponent(confirmButton)))
-                .addContainerGap(42, Short.MAX_VALUE))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
@@ -108,7 +109,7 @@ public class AuthorizationWindow extends javax.swing.JDialog {
     private void confirmButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_confirmButtonActionPerformed
         if (getAuthorization()==null){
             JOptionPane.showMessageDialog
-                (this,"请选择正确的选项",null,JOptionPane.WARNING_MESSAGE);
+                (this,"请选择正确的选项","修改权限",JOptionPane.WARNING_MESSAGE);
             return;
         }
         confirmFlag=true;

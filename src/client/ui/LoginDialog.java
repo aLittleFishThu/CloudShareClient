@@ -189,6 +189,7 @@ public class LoginDialog extends javax.swing.JDialog {
                 case OK:
                     FilePane filePane=new FilePane(m_MainFrame,m_Business);
                     m_MainFrame.setContentPane(filePane);
+                    m_MainFrame.pack();
                     m_MainFrame.setVisible(true);
                     this.dispose();
                     break;

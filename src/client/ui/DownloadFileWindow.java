@@ -42,6 +42,7 @@ public class DownloadFileWindow extends javax.swing.JDialog {
         m_CloudFile=cloudFile;
         this.content=content;
         initComponents();
+        this.setTitle("下载文件");
         this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
@@ -68,22 +69,22 @@ public class DownloadFileWindow extends javax.swing.JDialog {
         setTitle("下载文件");
         setResizable(false);
 
-        filenameLabel.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        filenameLabel.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         filenameLabel.setText("文件名");
 
-        filenameField.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        filenameField.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         filenameField.setText(m_CloudFile.getFilename());
 
-        filePathLabel.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        filePathLabel.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         filePathLabel.setText("下载到");
 
-        pathField.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        pathField.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
 
-        pathButton.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        pathButton.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         pathButton.setText("浏览");
         pathButton.addActionListener(formListener);
 
-        confirmButton.setFont(new Font("微软雅黑", 0, 14)); // NOI18N
+        confirmButton.setFont(new Font("微软雅黑", 0, 12)); // NOI18N
         confirmButton.setText("确定");
         confirmButton.addActionListener(formListener);
 
@@ -148,17 +149,17 @@ public class DownloadFileWindow extends javax.swing.JDialog {
         String filename=filenameField.getText();
         if (filename.equals("")){
             JOptionPane.showMessageDialog
-                (this,"请输入文件名",null,JOptionPane.WARNING_MESSAGE);
+                (this,"请输入文件名","下载文件",JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (filePath.equals("")){
             JOptionPane.showMessageDialog
-                (this,"请选择下载路径",null,JOptionPane.WARNING_MESSAGE);
+                (this,"请选择下载路径","下载文件",JOptionPane.WARNING_MESSAGE);
             return;
         }
         File file=new File(filePath+"\\"+filename);
         if (file.exists()){
-            int confirm=JOptionPane.showConfirmDialog(this, "检测到同名文件，是否覆盖？", "警告", JOptionPane.OK_CANCEL_OPTION);
+            int confirm=JOptionPane.showConfirmDialog(this, "检测到同名文件，是否覆盖？", "下载文件", JOptionPane.OK_CANCEL_OPTION);
             if (confirm==JOptionPane.CANCEL_OPTION){
                 return;
             }
@@ -170,14 +171,14 @@ public class DownloadFileWindow extends javax.swing.JDialog {
             fos.write(content);
             fos.close();
             JOptionPane.showMessageDialog
-            (this,"下载完成",null,JOptionPane.INFORMATION_MESSAGE);
+            (this,"下载完成","下载文件",JOptionPane.INFORMATION_MESSAGE);
             this.dispose();
         } catch (FileNotFoundException e) {
             JOptionPane.showMessageDialog
-            (this,"请输入正确的路径",null,JOptionPane.ERROR_MESSAGE);
+            (this,"请输入正确的路径","下载文件",JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             JOptionPane.showMessageDialog
-            (this,"IO异常",null,JOptionPane.ERROR_MESSAGE);
+            (this,"IO异常","下载文件",JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_confirmButtonActionPerformed
 
